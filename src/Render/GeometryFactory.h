@@ -1,0 +1,42 @@
+﻿#pragma once
+#include <string>
+
+#include "Mesh.h"
+
+struct Primitive {
+
+    enum Type : glm::int8
+    {
+        CUBE,
+        PLANE,
+
+        PRIMITIVE_COUNT
+    };
+    
+    Primitive(MeshData* mesh) : Mesh(mesh) {}
+    
+    MeshData* Mesh;
+};
+
+class GeometryFactory
+{
+public:
+    GeometryFactory();
+    ~GeometryFactory();
+
+    static GeometryFactory& getInstance();
+
+    [[nodiscard]] static MeshData* GetPrimitive(Primitive::Type);
+    
+    [[nodiscard]] static MeshData* LoadOrGetMeshFromFile(std::wstring path, bool invertV);
+    [[nodiscard]] static MeshData* CreateCube(float width, float height, float depth);
+    [[nodiscard]] static MeshData* CreatePlane(float width, float height);
+
+    static const inline std::wstring GEOMETRIES_FOLDER = L"res\\models\\";
+
+private :
+
+    std::map<std::wstring, MeshData*> mLoadedMesh = {};
+    std::map<glm::int8, Primitive> mPrimitives = {};
+
+};
