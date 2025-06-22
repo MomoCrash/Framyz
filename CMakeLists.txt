@@ -52,6 +52,8 @@ endif()
 
 include(AddIMGUI.cmake)
 
+include(AddJolt.cmake)
+
 include_directories(external)
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
@@ -79,19 +81,21 @@ if (WIN32)
             ${Vulkan_INCLUDE_DIRS}
             ${IM_GUI_PATH}
             ${IM_NODEFLOW_PATH}
+            ${JoltPhysics_SOURCE_DIR}/..
     )
 
     target_link_directories(${PROJECT_NAME} PUBLIC
             ${Vulkan_LIBRARIES}
     )
 
-    target_link_libraries(${PROJECT_NAME} glfw vulkan-1)
+    target_link_libraries(${PROJECT_NAME} glfw Jolt vulkan-1)
 elseif (UNIX)
     message(STATUS "CREATING BUILD FOR UNIX")
     target_include_directories(${PROJECT_NAME} PUBLIC
             ${PROJECT_SOURCE_DIR}/src
+            ${JoltPhysics_SOURCE_DIR}/..
     )
-    target_link_libraries(${PROJECT_NAME} glfw ${Vulkan_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} glfw Jolt ${Vulkan_LIBRARIES})
 endif()
 
 

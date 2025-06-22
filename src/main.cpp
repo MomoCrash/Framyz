@@ -9,10 +9,14 @@ int main() {
 
     // Call it to sync this window with the application
     Application::getInstance()->Initialize("Application");
+
+    GameManager game_manager;
     
     GuiHandler ui;
 
     Editor editor(&ui);
+
+    test_app();
 
     while(!editor.isEditorClosed())
     {

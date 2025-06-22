@@ -1,0 +1,51 @@
+// Created by Ethan G. on 22/06/2025.
+
+#ifndef COMPONENT_H
+#define COMPONENT_H
+
+#include "../../framework.h"
+
+class Entity;
+
+enum class ComponentType : uint64_t {
+    MeshRenderer,
+};
+
+class ComponentBase {
+    
+public:
+    
+    ComponentBase(Entity* entity);
+    virtual ~ComponentBase() = default;
+    Entity* GetOwner() const;
+
+    void activate();
+    void deactivate();
+
+    [[nodiscard]] bool isActive() const;
+
+    uint64_t Mask;
+
+protected:
+
+    Entity* m_owner;
+    bool m_active;
+    
+    
+};
+
+template <ComponentType typeID>
+struct Component : ComponentBase
+{
+    Component(Entity *entity)
+        : ComponentBase(entity) {
+        Mask = 1 << static_cast<uint64_t>(typeID);
+    }
+
+protected:
+    static constexpr ComponentType TypeID = typeID;
+};
+
+#define DECLARE_COMPONENT( name, parent ) struct name : parent<ComponentType::name>
+
+#endif //COMPONENT_H

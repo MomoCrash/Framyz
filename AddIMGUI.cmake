@@ -25,4 +25,4 @@ file(GLOB_RECURSE IMNODEFLOW_LIB ${IMNODEFLOW_DIR}/src/*.cpp
 include_directories(${IMNODEFLOW_DIR}/include)
 
 #STB Image
-include_directories(external/stb_image.h)
+include_directories(external/)

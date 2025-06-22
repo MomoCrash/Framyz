@@ -3,7 +3,7 @@
  */
 #pragma once
 
-#include "../framework.h"
+#include "../../framework.h"
 
 /* The simple sum basic node */
 class SimpleSum : public ImFlow::BaseNode

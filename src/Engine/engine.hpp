@@ -5,10 +5,13 @@
 
 #include "framework.h"
 
-#include "editor/InspectorWindow.h"
+#include "GameManager.h"
 
-#include "nodes/NodeEditor.h"
+#include "interfaces/editor/InspectorWindow.h"
 
-#include "editor/Editor.h"
+#include "interfaces/nodes/NodeEditor.h"
+#include "jolt/JoltHandler.h"
+
+#include "interfaces/editor/Editor.h"
 
 #endif //ENGINE_H

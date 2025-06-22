@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "../framework.h"
+#include "../../framework.h"
 #include "InspectorWindow.h"
-#include "../../Render/GuiHandler.h"
 
 class Mesh;
 struct NodeEditor;

@@ -1,6 +1,6 @@
 ﻿#include "Editor.h"
 
-#include "../framework.h"
+#include "../../framework.h"
 #include "../nodes/NodeEditor.h"
 
 Editor::Editor(GuiHandler* guiHandler)
