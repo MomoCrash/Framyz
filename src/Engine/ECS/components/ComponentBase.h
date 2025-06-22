@@ -15,7 +15,7 @@ class ComponentBase {
     
 public:
     
-    ComponentBase(Entity* entity);
+    ComponentBase();
     virtual ~ComponentBase() = default;
     Entity* GetOwner() const;
 
@@ -25,10 +25,11 @@ public:
     [[nodiscard]] bool isActive() const;
 
     uint64_t Mask;
+    Entity* Owner;
+    
 
 protected:
 
-    Entity* m_owner;
     bool m_active;
     
     
@@ -37,12 +38,10 @@ protected:
 template <ComponentType typeID>
 struct Component : ComponentBase
 {
-    Component(Entity *entity)
-        : ComponentBase(entity) {
+    Component() {
         Mask = 1 << static_cast<uint64_t>(typeID);
     }
-
-protected:
+    
     static constexpr ComponentType TypeID = typeID;
 };
 

@@ -5,8 +5,7 @@
 #include "components/ComponentBase.h"
 #include "Engine/Entity.h"
 
-EntityManager::EntityManager(): m_entityCount(0), m_entityToAddCount(0), m_entityToRemoveCount(0) {
-}
+EntityManager::EntityManager(): m_entityCount(0), m_entityToAddCount(0), m_entityToRemoveCount(0) {}
 
 void EntityManager::update() {
 
@@ -14,7 +13,7 @@ void EntityManager::update() {
     for (int i = 0; i < m_entityCount; i++) {
 
         Entity* entity = m_entities[i]->Entity;
-
+        
         if (entity->isDestroyed()) {
             
             m_toRemoveEntityIndex[m_entityToRemoveCount++] = entity->getId();
@@ -71,7 +70,8 @@ Entity * EntityManager::createEntity(Entity *parent) {
     Entity* newEntity = new Entity(parent);
     newEntity->preLoad(m_entityToAddCount);
 
-    m_entitiesToAdd[m_entityToAddCount++]->Entity = newEntity;
+    EntityComponentPair* pair = new EntityComponentPair(newEntity);
+    m_entitiesToAdd[m_entityToAddCount++] = pair;
     return newEntity;
     
 }
@@ -80,10 +80,10 @@ Entity * EntityManager::getEntity(int index) const {
     return m_entities[index]->Entity;
 }
 
-std::vector<ComponentBase *> const & EntityManager::getComponents(int index) const {
-    return m_entities[index]->AttachedComponents;
+std::vector<ComponentBase *> const & EntityManager::getComponents(Entity* index) {
+    return m_entities[*index->getId()]->AttachedComponents;
 }
 
-void EntityManager::attachComponent(ComponentBase *component, int entityIndex) const {
-    
+int EntityManager::getEntityCount() const {
+    return m_entityCount;
 }

@@ -1,11 +1,11 @@
-﻿#include "Application.h"
+﻿#include "RenderDevice.h"
 
 #include <map>
 #include <set>
 
 #include "RenderWindow.h"
 
-Application::~Application()
+RenderDevice::~RenderDevice()
 {
 
     // Cleanup
@@ -23,8 +23,10 @@ Application::~Application()
     
 }
 
-void Application::Initialize(const char* appName)
+void RenderDevice::Initialize(const char* appName)
 {
+
+    RenderDevice& renderDevice = *getInstance();
 
     static bool isInitialised = false;
     
@@ -52,35 +54,35 @@ void Application::Initialize(const char* appName)
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
-    if (m_enableValidationLayers) {
-        auto extensions = getRequiredExtensions();
-        createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
-        createInfo.ppEnabledLayerNames = m_validationLayers.data();
+    if (renderDevice.m_enableValidationLayers) {
+        auto extensions = renderDevice.getRequiredExtensions();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(renderDevice.m_validationLayers.size());
+        createInfo.ppEnabledLayerNames = renderDevice.m_validationLayers.data();
     }
     else {
         createInfo.enabledLayerCount = 0;
     }
-    auto extensions = getRequiredExtensions();
+    auto extensions = renderDevice.getRequiredExtensions();
     createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
     createInfo.ppEnabledExtensionNames = extensions.data();
 
     // Create Vulkan instance
-    VkResult result = vkCreateInstance(&createInfo, nullptr, &m_instance);
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &renderDevice.m_instance);
 
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("Failed to create Vulkan instance!");
     }
     // Check for validations layers (Used for debug because Vulkan don't support them)
-    if (m_enableValidationLayers && !checkValidationSupport()) {
+    if (renderDevice.m_enableValidationLayers && !renderDevice.checkValidationSupport()) {
         throw std::runtime_error("Validations layer enabled but not avaiable");
     }
 
-    setupDebugLayer();
+    renderDevice.setupDebugLayer();
 
 }
 
-VkSurfaceKHR* Application::createSurface(RenderWindow& window)
+VkSurfaceKHR* RenderDevice::createSurface(RenderWindow& window)
 {
     VkSurfaceKHR* surface = new VkSurfaceKHR();
     if (glfwCreateWindowSurface(m_instance, window.GetWindow(), nullptr, surface) != VK_SUCCESS) {
@@ -91,7 +93,7 @@ VkSurfaceKHR* Application::createSurface(RenderWindow& window)
     return surface;
 }
 
-void Application::setupDebugLayer()
+void RenderDevice::setupDebugLayer()
 {
     if (!m_enableValidationLayers) return;
 
@@ -108,7 +110,7 @@ void Application::setupDebugLayer()
     }
 }
 
-void Application::setupPhysicalDevice(VkSurfaceKHR& surface)
+void RenderDevice::setupPhysicalDevice(VkSurfaceKHR& surface)
 {
     if (m_physicalDevice) return;
     
@@ -136,7 +138,7 @@ void Application::setupPhysicalDevice(VkSurfaceKHR& surface)
     }
 }
 
-void Application::setupLogicalDevice(VkSurfaceKHR& surface)
+void RenderDevice::setupLogicalDevice(VkSurfaceKHR& surface)
 {
 
     if (m_device) return;
@@ -170,7 +172,7 @@ void Application::setupLogicalDevice(VkSurfaceKHR& surface)
     createInfo.enabledExtensionCount = static_cast<uint32_t>(getDeviceExtensions().size());
     createInfo.ppEnabledExtensionNames = getDeviceExtensions().data();
 
-    if (Application::getInstance()->useValidationLayer()) {
+    if (RenderDevice::getInstance()->useValidationLayer()) {
         createInfo.enabledLayerCount = static_cast<uint32_t>(getValidationLayer().size());
         createInfo.ppEnabledLayerNames = getValidationLayer().data();
     } else {
@@ -185,18 +187,18 @@ void Application::setupLogicalDevice(VkSurfaceKHR& surface)
     vkGetDeviceQueue(m_device, indices.presentFamily.value(), 0, &m_presentQueue);
 }
 
-Application* Application::getInstance()
+RenderDevice* RenderDevice::getInstance()
 {
-    static Application instance;
+    static RenderDevice instance;
     return &instance;
 }
 
-VkInstance& Application::getVulkanInstance()
+VkInstance& RenderDevice::getVulkanInstance()
 {
     return m_instance;
 }
 
-int Application::rateDeviceSuitability(VkPhysicalDevice device, VkSurfaceKHR& surface)
+int RenderDevice::rateDeviceSuitability(VkPhysicalDevice device, VkSurfaceKHR& surface)
 {
 
     vkGetPhysicalDeviceProperties(device, &m_deviceProperties);
@@ -232,7 +234,7 @@ int Application::rateDeviceSuitability(VkPhysicalDevice device, VkSurfaceKHR& su
     return score;
 }
 
-SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR& surface)
+SwapChainSupportDetails RenderDevice::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR& surface)
 {
     SwapChainSupportDetails details;
 
@@ -258,7 +260,7 @@ SwapChainSupportDetails Application::querySwapChainSupport(VkPhysicalDevice devi
     return details;
 }
 
-bool Application::checkDeviceExtensionSupport(VkPhysicalDevice device)
+bool RenderDevice::checkDeviceExtensionSupport(VkPhysicalDevice device)
 {
     uint32_t extensionCount;
     vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -275,7 +277,7 @@ bool Application::checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-QueueFamilyIndices Application::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR& surface)
+QueueFamilyIndices RenderDevice::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR& surface)
 {
     
     QueueFamilyIndices graphicsFamily;
@@ -306,7 +308,7 @@ QueueFamilyIndices Application::findQueueFamilies(VkPhysicalDevice device, VkSur
     
 }
 
-bool Application::checkValidationSupport()
+bool RenderDevice::checkValidationSupport()
 {
 
     uint32_t layerCount;
@@ -333,7 +335,7 @@ bool Application::checkValidationSupport()
     return true;
 }
 
-std::vector<const char*> Application::getRequiredExtensions() const
+std::vector<const char*> RenderDevice::getRequiredExtensions() const
 {
     uint32_t glfwExtensionCount = 0;
     const char** glfwExtensions;
@@ -348,52 +350,52 @@ std::vector<const char*> Application::getRequiredExtensions() const
     return extensions;
 }
 
-VkDevice const& Application::getDevice()
+VkDevice const& RenderDevice::getDevice()
 {
     return m_device;
 }
 
-VkPhysicalDevice const& Application::getPhysicalDevice()
+VkPhysicalDevice const& RenderDevice::getPhysicalDevice()
 {
     return m_physicalDevice;
 }
 
-bool const& Application::useValidationLayer()
+bool const& RenderDevice::useValidationLayer()
 {
     return m_enableValidationLayers;
 }
 
-std::vector<const char*> const& Application::getDeviceExtensions()
+std::vector<const char*> const& RenderDevice::getDeviceExtensions()
 {
     return m_deviceExtensions;
 }
 
-std::vector<const char*> const& Application::getValidationLayer()
+std::vector<const char*> const& RenderDevice::getValidationLayer()
 {
     return m_validationLayers;
 }
 
-VkQueue const& Application::getGraphicQueue()
+VkQueue const& RenderDevice::getGraphicQueue()
 {
     return m_graphicsQueue;
 }
 
-VkQueue const& Application::getPresentQueue()
+VkQueue const& RenderDevice::getPresentQueue()
 {
     return m_presentQueue;
 }
 
-VkPhysicalDeviceProperties& Application::GetPhysicalDeviceProperties()
+VkPhysicalDeviceProperties& RenderDevice::GetPhysicalDeviceProperties()
 {
     return m_deviceProperties;
 }
 
-VkPhysicalDeviceFeatures& Application::GetPhysicalDeviceFeatures()
+VkPhysicalDeviceFeatures& RenderDevice::GetPhysicalDeviceFeatures()
 {
     return m_deviceFeatures;
 }
 
-VkBool32 Application::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+VkBool32 RenderDevice::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                                     VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                                     void* pUserData)
 {
@@ -416,7 +418,7 @@ VkBool32 Application::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messa
     }
 }
 
-uint32_t Application::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
+uint32_t RenderDevice::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(getInstance()->getPhysicalDevice(), &memProperties);
@@ -430,7 +432,7 @@ uint32_t Application::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
+VkFormat RenderDevice::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling,
     VkFormatFeatureFlags features)
 {
     for (VkFormat format : candidates) {
@@ -448,7 +450,7 @@ VkFormat Application::findSupportedFormat(const std::vector<VkFormat>& candidate
     
 }
 
-VkFormat Application::findDepthFormat()
+VkFormat RenderDevice::findDepthFormat()
 {
     return findSupportedFormat(
         {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
@@ -457,7 +459,7 @@ VkFormat Application::findDepthFormat()
     );
 }
 
-size_t Application::getDynamicAlignment()
+size_t RenderDevice::getDynamicAlignment()
 {
     size_t minUboAlignment = getInstance()->GetPhysicalDeviceProperties().limits.minUniformBufferOffsetAlignment;
     size_t m_dynamicBufferAlignment = sizeof(glm::mat4);
@@ -467,7 +469,7 @@ size_t Application::getDynamicAlignment()
     return m_dynamicBufferAlignment;
 }
 
-void* Application::alignedAlloc(size_t size, size_t alignment)
+void* RenderDevice::alignedAlloc(size_t size, size_t alignment)
 {
     void *data = nullptr;
 #if defined(_MSC_VER) || defined(__MINGW32__)
@@ -480,7 +482,7 @@ void* Application::alignedAlloc(size_t size, size_t alignment)
     return data;
 }
 
-void Application::createBuffer(VkBufferUsageFlags usages, VkMemoryPropertyFlags flags,
+void RenderDevice::createBuffer(VkBufferUsageFlags usages, VkMemoryPropertyFlags flags,
                                VkBuffer& buffer, VkDeviceMemory& uploader, uint64_t size)
 {
     
@@ -509,7 +511,7 @@ void Application::createBuffer(VkBufferUsageFlags usages, VkMemoryPropertyFlags 
     vkBindBufferMemory(m_device, buffer, uploader, 0);
 }
 
-VkResult Application::CreateDebugUtilsMessengerEXT(VkInstance instance,
+VkResult RenderDevice::CreateDebugUtilsMessengerEXT(VkInstance instance,
     const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator,
     VkDebugUtilsMessengerEXT* pDebugMessenger)
 {
@@ -521,7 +523,7 @@ VkResult Application::CreateDebugUtilsMessengerEXT(VkInstance instance,
     }
 }
 
-void Application::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+void RenderDevice::DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
     const VkAllocationCallbacks* pAllocator)
 {
     auto func = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");

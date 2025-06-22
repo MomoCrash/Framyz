@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "Mesh.h"
 #include "RenderWindow.h"
 #include "Sampler.h"
@@ -23,7 +23,7 @@ RenderPipeline::RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget&
     layoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
     layoutInfo.pBindings = setLayoutBindings.data();
 
-    if (vkCreateDescriptorSetLayout(Application::getInstance()->getDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(RenderDevice::getInstance()->getDevice(), &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
     
@@ -35,7 +35,7 @@ RenderPipeline::RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget&
     pipelineLayoutInfo.pushConstantRangeCount = 0; // Optional
     pipelineLayoutInfo.pPushConstantRanges = nullptr; // Optional
 
-    VkResult result = vkCreatePipelineLayout(Application::getInstance()->getDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout);
+    VkResult result = vkCreatePipelineLayout(RenderDevice::getInstance()->getDevice(), &pipelineLayoutInfo, nullptr, &m_pipelineLayout);
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
@@ -130,7 +130,7 @@ RenderPipeline::RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget&
 
     VkPipelineCacheCreateInfo pipelineCacheCreateInfo = {};
     pipelineCacheCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
-    vkCreatePipelineCache(Application::getInstance()->getDevice(), &pipelineCacheCreateInfo, nullptr, &m_pipelineCache);
+    vkCreatePipelineCache(RenderDevice::getInstance()->getDevice(), &pipelineCacheCreateInfo, nullptr, &m_pipelineCache);
     
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -151,7 +151,7 @@ RenderPipeline::RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget&
     pipelineInfo.basePipelineIndex = -1;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(Application::getInstance()->getDevice(), m_pipelineCache, 1,
+    if (vkCreateGraphicsPipelines(RenderDevice::getInstance()->getDevice(), m_pipelineCache, 1,
                                   &pipelineInfo, nullptr, &m_graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
@@ -165,25 +165,25 @@ RenderPipeline::RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget&
 RenderPipeline::~RenderPipeline()
 {
     
-    vkDestroyDescriptorSetLayout(Application::getInstance()->getDevice(), m_descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(RenderDevice::getInstance()->getDevice(), m_descriptorSetLayout, nullptr);
     
-    vkDestroyPipelineLayout(Application::getInstance()->getDevice(), m_pipelineLayout, nullptr);
+    vkDestroyPipelineLayout(RenderDevice::getInstance()->getDevice(), m_pipelineLayout, nullptr);
 
-    vkDestroyPipelineCache(Application::getInstance()->getDevice(), m_pipelineCache, nullptr);
+    vkDestroyPipelineCache(RenderDevice::getInstance()->getDevice(), m_pipelineCache, nullptr);
     
-    vkDestroyPipeline(Application::getInstance()->getDevice(), m_graphicsPipeline, nullptr);
+    vkDestroyPipeline(RenderDevice::getInstance()->getDevice(), m_graphicsPipeline, nullptr);
 
-    vkDestroyDescriptorPool(Application::getInstance()->getDevice(), m_descriptorPool, nullptr);
+    vkDestroyDescriptorPool(RenderDevice::getInstance()->getDevice(), m_descriptorPool, nullptr);
 
     for (size_t i = 0; i < RenderWindow::MAX_FRAMES_IN_FLIGHT; i++) {
 
         // Buffers
-        vkDestroyBuffer(Application::getInstance()->getDevice(), m_uniformBuffers[i], nullptr);
-        vkFreeMemory(Application::getInstance()->getDevice(), m_uniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(RenderDevice::getInstance()->getDevice(), m_uniformBuffers[i], nullptr);
+        vkFreeMemory(RenderDevice::getInstance()->getDevice(), m_uniformBuffersMemory[i], nullptr);
 
         // Buffers
-        vkDestroyBuffer(Application::getInstance()->getDevice(), m_dynamicUniformBuffers[i], nullptr);
-        vkFreeMemory(Application::getInstance()->getDevice(), m_dynamicUniformBuffersMemory[i], nullptr);
+        vkDestroyBuffer(RenderDevice::getInstance()->getDevice(), m_dynamicUniformBuffers[i], nullptr);
+        vkFreeMemory(RenderDevice::getInstance()->getDevice(), m_dynamicUniformBuffersMemory[i], nullptr);
         
     }
     
@@ -204,7 +204,7 @@ void RenderPipeline::createDescriptorPool()
     poolInfo.pPoolSizes = poolSizes.data();
     poolInfo.maxSets = static_cast<uint32_t>(RenderWindow::MAX_FRAMES_IN_FLIGHT);
 
-    if (vkCreateDescriptorPool(Application::getInstance()->getDevice(), &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS) {
+    if (vkCreateDescriptorPool(RenderDevice::getInstance()->getDevice(), &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
 }
@@ -220,7 +220,7 @@ void RenderPipeline::createDescriptorSets(Texture& texture, Sampler& sampler)
     allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.size());
 
     m_descriptorSets.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
-    if (vkAllocateDescriptorSets(Application::getInstance()->getDevice(),
+    if (vkAllocateDescriptorSets(RenderDevice::getInstance()->getDevice(),
         &allocInfo, m_descriptorSets.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
@@ -235,7 +235,7 @@ void RenderPipeline::createDescriptorSets(Texture& texture, Sampler& sampler)
         VkDescriptorBufferInfo dBufferInfo{};
         dBufferInfo.buffer = m_dynamicUniformBuffers[i];
         dBufferInfo.offset = 0;
-        dBufferInfo.range = Application::getDynamicAlignment();
+        dBufferInfo.range = RenderDevice::getDynamicAlignment();
 
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -272,7 +272,7 @@ void RenderPipeline::createDescriptorSets(Texture& texture, Sampler& sampler)
             writeTextureDescriptorSet
         };
 
-        vkUpdateDescriptorSets(Application::getInstance()->getDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
+        vkUpdateDescriptorSets(RenderDevice::getInstance()->getDevice(), static_cast<uint32_t>(writeDescriptorSets.size()), writeDescriptorSets.data(), 0, nullptr);
         
     }
     
@@ -287,27 +287,27 @@ void RenderPipeline::createUniformBuffers()
     m_uniformBuffersMapped.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
 
     for (size_t i = 0; i < RenderWindow::MAX_FRAMES_IN_FLIGHT; i++) {
-        Application::getInstance()->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        RenderDevice::getInstance()->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
             m_uniformBuffers[i], m_uniformBuffersMemory[i], bufferSize);
 
-        vkMapMemory(Application::getInstance()->getDevice(), m_uniformBuffersMemory[i], 0, bufferSize, 0, &m_uniformBuffersMapped[i]);
+        vkMapMemory(RenderDevice::getInstance()->getDevice(), m_uniformBuffersMemory[i], 0, bufferSize, 0, &m_uniformBuffersMapped[i]);
     }
 
-    std::cout << "minUniformBufferOffsetAlignment = " << Application::getDynamicAlignment() << std::endl;
-    std::cout << "dynamicAlignment = " << Application::getDynamicAlignment() << std::endl;
+    std::cout << "minUniformBufferOffsetAlignment = " << RenderDevice::getDynamicAlignment() << std::endl;
+    std::cout << "dynamicAlignment = " << RenderDevice::getDynamicAlignment() << std::endl;
 
     m_dynamicUniformBuffers.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
     m_dynamicUniformBuffersMemory.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
     m_dynamicUniformBuffersMapped.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
 
-    size_t dBufferSize = MAX_OBJECT_RENDERER * Application::getDynamicAlignment();
+    size_t dBufferSize = MAX_OBJECT_RENDERER * RenderDevice::getDynamicAlignment();
     for (size_t i = 0; i < RenderWindow::MAX_FRAMES_IN_FLIGHT; i++) {
-        Application::getInstance()->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        RenderDevice::getInstance()->createBuffer(VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
             m_dynamicUniformBuffers[i], m_dynamicUniformBuffersMemory[i], dBufferSize);
 
-        vkMapMemory(Application::getInstance()->getDevice(), m_dynamicUniformBuffersMemory[i], 0, dBufferSize, 0, &m_dynamicUniformBuffersMapped[i]);
+        vkMapMemory(RenderDevice::getInstance()->getDevice(), m_dynamicUniformBuffersMemory[i], 0, dBufferSize, 0, &m_dynamicUniformBuffersMapped[i]);
     }
 }
 
@@ -351,5 +351,5 @@ void RenderPipeline::Update(UniformBufferObject& buffer, uint32_t frame)
 
 void RenderPipeline::UpdatePerObject(UboDataDynamic* buffer, uint32_t frame)
 {
-    memcpy(m_dynamicUniformBuffersMapped[frame], buffer->model, MAX_OBJECT_RENDERER * Application::getDynamicAlignment());
+    memcpy(m_dynamicUniformBuffersMapped[frame], buffer->model, MAX_OBJECT_RENDERER * RenderDevice::getDynamicAlignment());
 }

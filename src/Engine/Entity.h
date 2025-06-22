@@ -30,7 +30,7 @@ public:
     [[nodiscard]] bool hasTag(uint32_t oTag) const { return m_tag & oTag; }
     [[nodiscard]] uint32_t getTag() const { return m_tag; }
     
-    Transform const& getTransform() const { return m_transform; }
+    Transform& getTransform() { return m_transform; }
     
 
 protected:

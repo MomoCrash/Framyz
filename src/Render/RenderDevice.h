@@ -21,18 +21,18 @@ struct SwapChainSupportDetails {
     std::vector<VkPresentModeKHR> presentModes;
 };
 
-class Application
+class RenderDevice
 {
 public:
-    ~Application();
-    void Initialize(const char* appName);
+    ~RenderDevice();
+    static void Initialize(const char* appName);
 
     VkSurfaceKHR* createSurface(RenderWindow& window);
     void setupDebugLayer();
     void setupPhysicalDevice(VkSurfaceKHR& surface);
     void setupLogicalDevice(VkSurfaceKHR& surface);
     
-    static Application* getInstance();
+    static RenderDevice* getInstance();
     
     VkInstance& getVulkanInstance();
     VkDevice const& getDevice();

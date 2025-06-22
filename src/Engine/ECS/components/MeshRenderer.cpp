@@ -2,5 +2,4 @@
 
 #include "MeshRenderer.h"
 
-MeshRenderer::MeshRenderer(Entity* owner)
-    : Component(owner) {}
+MeshRenderer::MeshRenderer() {}

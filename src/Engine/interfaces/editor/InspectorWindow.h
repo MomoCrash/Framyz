@@ -2,6 +2,7 @@
 
 #include "../../framework.h"
 
+class Entity;
 class RenderObject;
 
 class InspectorWindow
@@ -10,9 +11,9 @@ public:
     InspectorWindow();
     ~InspectorWindow();
 
-    void drawUI(ImGuiID& dockspaceId);
-    void setInspectedObject(RenderObject* renderObject);
+    void draw();
+    void setInspectedObject(Entity* renderObject);
 
 private:
-    RenderObject* m_inspectedObject;
+    Entity* m_inspectedObject;
 };

@@ -7,8 +7,9 @@
 
 DECLARE_COMPONENT( MeshRenderer, Component )
 {
-    MeshRenderer(Entity* owner);
-    
+    MeshRenderer();
+
+    RenderObject* Object;
 };
 
 

@@ -5,7 +5,7 @@
 
 #include "framework.h"
 
-#include "Application.h"
+#include "RenderDevice.h"
 
 #include "Window.h"
 #include "RenderContext.h"

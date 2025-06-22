@@ -9,6 +9,7 @@
 #include "Engine/Entity.h"
 
 class ComponentBase;
+class GameManager;
 
 class EntityManager {
 
@@ -28,35 +29,67 @@ public:
     Entity* createEntity(Entity* parent);
     [[nodiscard]] Entity* getEntity(int index) const;
     
-    [[nodiscard]] std::vector<ComponentBase*> const& getComponents(int index) const;
+    [[nodiscard]] std::vector<ComponentBase*> const& getComponents(Entity* entity) ;
     template<typename C>
-    C const* getComponent(int index, ComponentType component) const;
-    
-    void attachComponent(ComponentBase* component, int entityIndex) const;
+    C* getComponent(Entity* entity) ;
+    template<typename C>
+    C* attachComponent(Entity* entity) ;
+
+    int getEntityCount() const;
 
 private:
-
     int m_entityCount;
     int m_entityToAddCount;
     int m_entityToRemoveCount;
     
-    EntityComponentPair** m_entities        = new EntityComponentPair *[2048];
-    EntityComponentPair** m_entitiesToAdd   = new EntityComponentPair *[2048];
+    EntityComponentPair** m_entities        = new EntityComponentPair *[2048] {nullptr};
+    EntityComponentPair** m_entitiesToAdd   = new EntityComponentPair *[2048] {nullptr};
     
-    int** m_toRemoveEntityIndex = new int*[2048];
-    
+    int** m_toRemoveEntityIndex = new int*[2048] {nullptr};
+
+    friend GameManager;
     friend Entity;
     
 };
 
 template<typename C>
-C const* EntityManager::getComponent(int index, ComponentType component) const {
-    for (ComponentBase* comp : m_entities[index]->AttachedComponents) {
-        if (comp->Mask & static_cast<uint64_t>(component) ) {
-            return dynamic_cast<C*>(component);
+C* EntityManager::getComponent(Entity* entity) {
+
+    if (entity->isCreated()) {
+        EntityComponentPair* pair = m_entities[*entity->getId()];
+        for (ComponentBase* comp : pair->AttachedComponents) {
+            if (comp->Mask & static_cast<uint64_t>(C::TypeID) ) {
+                return dynamic_cast<C*>(comp);
+            }
+        }
+        return nullptr;
+    }
+    
+    EntityComponentPair* pair = m_entitiesToAdd[*entity->getId()];
+    for (ComponentBase* comp : pair->AttachedComponents) {
+        if (comp->Mask & static_cast<uint64_t>(C::TypeID) ) {
+            return dynamic_cast<C*>(comp);
         }
     }
     return nullptr;
+    
+}
+
+template<typename C>
+C* EntityManager::attachComponent(Entity* entity)  {
+    if (C* component = getComponent<C>(entity))
+        return component;
+    
+    C* newComponent = new C();
+    EntityComponentPair* pair;
+    
+    if (entity->isCreated())
+        pair = m_entities[*entity->getId()];
+    else
+        pair = m_entitiesToAdd[*entity->getId()];
+    
+    pair->AttachedComponents.push_back(newComponent);
+    return newComponent;
 }
 
 #endif //ENTITYMANAGER_H

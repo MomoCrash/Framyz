@@ -1,6 +1,6 @@
 ﻿#include "GuiHandler.h"
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "framework.h"
 #include "RenderWindow.h"
 
@@ -19,7 +19,7 @@ GuiHandler::~GuiHandler()
 
 	for (auto pool : m_imguiPools)
 	{
-		vkDestroyDescriptorPool(Application::getInstance()->getDevice(), pool, nullptr);
+		vkDestroyDescriptorPool(RenderDevice::getInstance()->getDevice(), pool, nullptr);
 	}
 	
 }
@@ -54,7 +54,7 @@ int GuiHandler::inject(RenderWindow* window)
 	pool_info.poolSizeCount = std::size(pool_sizes);
 	pool_info.pPoolSizes = pool_sizes;
     
-	if (vkCreateDescriptorPool(Application::getInstance()->getDevice(), &pool_info, nullptr, &m_imguiPools[index]) != VK_SUCCESS)
+	if (vkCreateDescriptorPool(RenderDevice::getInstance()->getDevice(), &pool_info, nullptr, &m_imguiPools[index]) != VK_SUCCESS)
 	{
 		throw std::runtime_error("failed to create descriptor pool");
 	}
@@ -77,15 +77,15 @@ int GuiHandler::inject(RenderWindow* window)
 	
 	ImGui_ImplGlfw_InitForVulkan(window->GetWindow(), false);
     
-	QueueFamilyIndices queueFamilyIndices = Application::getInstance()->findQueueFamilies(Application::getInstance()->getPhysicalDevice(), window->getSurface());
+	QueueFamilyIndices queueFamilyIndices = RenderDevice::getInstance()->findQueueFamilies(RenderDevice::getInstance()->getPhysicalDevice(), window->getSurface());
     
 	ImGui_ImplVulkan_InitInfo init_info = {};
 	//init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion, otherwise will default to header version.
-	init_info.Instance = Application::getInstance()->getVulkanInstance();
-	init_info.PhysicalDevice = Application::getInstance()->getPhysicalDevice();
-	init_info.Device = Application::getInstance()->getDevice();
+	init_info.Instance = RenderDevice::getInstance()->getVulkanInstance();
+	init_info.PhysicalDevice = RenderDevice::getInstance()->getPhysicalDevice();
+	init_info.Device = RenderDevice::getInstance()->getDevice();
 	init_info.QueueFamily = queueFamilyIndices.graphicsFamily.value();
-	init_info.Queue = Application::getInstance()->getGraphicQueue();
+	init_info.Queue = RenderDevice::getInstance()->getGraphicQueue();
 	init_info.PipelineCache = nullptr;
 	init_info.DescriptorPool = m_imguiPools[index];
 	init_info.RenderPass = window->getRenderTarget().getRenderPass();
@@ -102,7 +102,7 @@ int GuiHandler::inject(RenderWindow* window)
 
 void GuiHandler::remove(int index)
 {
-	vkDestroyDescriptorPool(Application::getInstance()->getDevice(), m_imguiPools[index], nullptr);
+	vkDestroyDescriptorPool(RenderDevice::getInstance()->getDevice(), m_imguiPools[index], nullptr);
 	m_imguiPools.at(index) = VK_NULL_HANDLE;
 	m_imguiPools.erase (m_imguiPools.begin()+index);
 	m_imguiContexts.erase(m_imguiContexts.begin()+index);

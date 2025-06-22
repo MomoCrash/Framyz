@@ -1,6 +1,6 @@
 ﻿#include "RenderTarget.h"
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "Mesh.h"
 #include "RenderObject.h"
 #include "RenderWindow.h"
@@ -11,9 +11,9 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height)
     m_globalBuffer.proj = glm::mat4(1.0f);
     m_globalBuffer.view = glm::mat4(1.0f);
 
-    size_t align = Application::getDynamicAlignment();
+    size_t align = RenderDevice::getDynamicAlignment();
     size_t dBufferSize = 125 * align;
-    m_perObjectBuffer.model = (glm::mat4*)Application::alignedAlloc(dBufferSize, align);
+    m_perObjectBuffer.model = (glm::mat4*)RenderDevice::alignedAlloc(dBufferSize, align);
     assert(m_perObjectBuffer.model);
 
     m_format = format;
@@ -28,7 +28,7 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height)
 RenderTarget::~RenderTarget()
 {
     
-    vkDestroyRenderPass(Application::getInstance()->getDevice(), m_renderPass, nullptr);
+    vkDestroyRenderPass(RenderDevice::getInstance()->getDevice(), m_renderPass, nullptr);
 
 }
 
@@ -71,7 +71,7 @@ void RenderTarget::beginDraw()
 
 void RenderTarget::drawObject(RenderPipeline& pipeline, RenderObject& object)
 {
-    glm::mat4* modelMat = (glm::mat4*)((uint64_t)m_perObjectBuffer.model + (currentObject * Application::getDynamicAlignment()));
+    glm::mat4* modelMat = (glm::mat4*)((uint64_t)m_perObjectBuffer.model + (currentObject * RenderDevice::getDynamicAlignment()));
     *modelMat = object.getTransform();
     
     pipeline.UpdatePerObject(&m_perObjectBuffer, getRenderContext().getCurrentFrame());
@@ -87,7 +87,7 @@ void RenderTarget::drawObject(RenderPipeline& pipeline, RenderObject& object)
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer, object.getMesh()->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-    uint32_t dynamicOffset = currentObject * static_cast<uint32_t>(Application::getDynamicAlignment());
+    uint32_t dynamicOffset = currentObject * static_cast<uint32_t>(RenderDevice::getDynamicAlignment());
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getGraphicsPipelineLayout(),
         0, 1, &pipeline.GetDescriptorSets(getRenderContext().getCurrentFrame()), 1, &dynamicOffset);
     vkCmdDrawIndexed(commandBuffer, object.getMesh()->getIndexCount(), 1, 0, 0, 0);
@@ -142,7 +142,7 @@ VkImageView RenderTarget::createImageView(VkImage image, VkFormat format)
     viewInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageView;
-    if (vkCreateImageView(Application::getInstance()->getDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+    if (vkCreateImageView(RenderDevice::getInstance()->getDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 
@@ -178,7 +178,7 @@ void RenderTarget::createRenderPass()
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
 
-    if (vkCreateRenderPass(Application::getInstance()->getDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(RenderDevice::getInstance()->getDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
     
@@ -206,24 +206,24 @@ void RenderTarget::createImages()
     m_imagesMemory.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < m_images.size(); i++)
     {
-        if (vkCreateImage(Application::getInstance()->getDevice(), &imageInfo, nullptr, &m_images[i]) != VK_SUCCESS) {
+        if (vkCreateImage(RenderDevice::getInstance()->getDevice(), &imageInfo, nullptr, &m_images[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create image!");
         }
 
         VkMemoryRequirements memRequirements;
-        vkGetImageMemoryRequirements(Application::getInstance()->getDevice(), m_images[i], &memRequirements);
+        vkGetImageMemoryRequirements(RenderDevice::getInstance()->getDevice(), m_images[i], &memRequirements);
 
         VkMemoryAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         allocInfo.allocationSize = memRequirements.size;
-        allocInfo.memoryTypeIndex = Application::getInstance()->findMemoryType(memRequirements.memoryTypeBits,
+        allocInfo.memoryTypeIndex = RenderDevice::getInstance()->findMemoryType(memRequirements.memoryTypeBits,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-        if (vkAllocateMemory(Application::getInstance()->getDevice(), &allocInfo, nullptr, &m_imagesMemory[i]) != VK_SUCCESS) {
+        if (vkAllocateMemory(RenderDevice::getInstance()->getDevice(), &allocInfo, nullptr, &m_imagesMemory[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate image memory!");
         }
 
-        vkBindImageMemory(Application::getInstance()->getDevice(), m_images[i], m_imagesMemory[i], 0);
+        vkBindImageMemory(RenderDevice::getInstance()->getDevice(), m_images[i], m_imagesMemory[i], 0);
     }
 
 
@@ -262,7 +262,7 @@ void RenderTarget::createFramebuffers()
         framebufferInfo.height = m_extent.height + m_offset.y;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(Application::getInstance()->getDevice(), &framebufferInfo, nullptr, &m_framebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(RenderDevice::getInstance()->getDevice(), &framebufferInfo, nullptr, &m_framebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }

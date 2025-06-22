@@ -1,12 +1,12 @@
 ﻿#include "Sampler.h"
 
-#include "Application.h"
+#include "RenderDevice.h"
 
 Sampler::Sampler()
 {
 
     VkPhysicalDeviceProperties properties{};
-    vkGetPhysicalDeviceProperties(Application::getInstance()->getPhysicalDevice(), &properties);
+    vkGetPhysicalDeviceProperties(RenderDevice::getInstance()->getPhysicalDevice(), &properties);
     
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -26,7 +26,7 @@ Sampler::Sampler()
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = 0.0f;
 
-    if (vkCreateSampler(Application::getInstance()->getDevice(), &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS) {
+    if (vkCreateSampler(RenderDevice::getInstance()->getDevice(), &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
     
@@ -34,7 +34,7 @@ Sampler::Sampler()
 
 Sampler::~Sampler()
 {
-    vkDestroySampler(Application::getInstance()->getDevice(), m_textureSampler, nullptr);
+    vkDestroySampler(RenderDevice::getInstance()->getDevice(), m_textureSampler, nullptr);
 }
 
 VkSampler& Sampler::getSampler()

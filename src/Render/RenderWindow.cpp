@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <chrono>
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "Mesh.h"
 #include "RenderObject.h"
 #include "RenderPipeline.h"
@@ -11,15 +11,15 @@
 #include "Texture.h"
 
 RenderWindow::RenderWindow(const char* name, const int width, const int height)
-    : Window(name, width, height), m_device(&Application::getInstance()->getDevice())
+    : Window(name, width, height), m_device(&RenderDevice::getInstance()->getDevice())
 {
 
     m_globalBuffer.proj = glm::mat4(1.0f);
     m_globalBuffer.view = glm::mat4(1.0f);
 
-    size_t align = Application::getDynamicAlignment();
+    size_t align = RenderDevice::getDynamicAlignment();
     size_t dBufferSize = 125 * align;
-    m_perObjectBuffer.model = (glm::mat4*)Application::alignedAlloc(dBufferSize, align);
+    m_perObjectBuffer.model = (glm::mat4*)RenderDevice::alignedAlloc(dBufferSize, align);
     assert(m_perObjectBuffer.model);
 
     glfwSetWindowUserPointer(m_window, this);
@@ -31,8 +31,8 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
 
     createSurface();
 
-    Application::getInstance()->setupPhysicalDevice(getSurface());
-    Application::getInstance()->setupLogicalDevice(getSurface());
+    RenderDevice::getInstance()->setupPhysicalDevice(getSurface());
+    RenderDevice::getInstance()->setupLogicalDevice(getSurface());
 
     m_renderContext = new RenderContext(getSurface());
     m_renderContext->setCurrentFrame(&currentFrame);
@@ -66,17 +66,17 @@ RenderWindow::~RenderWindow()
         
     }
 
-    vkDestroySurfaceKHR(Application::getInstance()->getVulkanInstance(), m_surface, nullptr);
+    vkDestroySurfaceKHR(RenderDevice::getInstance()->getVulkanInstance(), m_surface, nullptr);
 }
 
 void RenderWindow::createSurface()
 {
-    m_surface = *Application::getInstance()->createSurface(*this);
+    m_surface = *RenderDevice::getInstance()->createSurface(*this);
 }
 
 void RenderWindow::createSwapChain()
 {
-    SwapChainSupportDetails swapChainSupport = Application::getInstance()->querySwapChainSupport(Application::getInstance()->getPhysicalDevice(), m_surface);
+    SwapChainSupportDetails swapChainSupport = RenderDevice::getInstance()->querySwapChainSupport(RenderDevice::getInstance()->getPhysicalDevice(), m_surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -101,7 +101,7 @@ void RenderWindow::createSwapChain()
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = Application::getInstance()->findQueueFamilies(Application::getInstance()->getPhysicalDevice(), m_surface);
+    QueueFamilyIndices indices = RenderDevice::getInstance()->findQueueFamilies(RenderDevice::getInstance()->getPhysicalDevice(), m_surface);
     uint32_t queueFamilyIndices[] = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -170,7 +170,7 @@ void RenderWindow::createFramebuffers()
 void RenderWindow::createDepthResources()
 {
     
-    VkFormat depthFormat = Application::getInstance()->findDepthFormat();
+    VkFormat depthFormat = RenderDevice::getInstance()->findDepthFormat();
     
 }
 
@@ -389,7 +389,7 @@ void RenderWindow::beginDraw()
 
 void RenderWindow::drawObject(RenderPipeline& pipeline, RenderObject& object)
 {
-    glm::mat4* modelMat = (glm::mat4*)((uint64_t)m_perObjectBuffer.model + (currentObject * Application::getDynamicAlignment()));
+    glm::mat4* modelMat = (glm::mat4*)((uint64_t)m_perObjectBuffer.model + (currentObject * RenderDevice::getDynamicAlignment()));
     *modelMat = object.getTransform();
 
     pipeline.UpdatePerObject(&m_perObjectBuffer, getRenderContext().getCurrentFrame());
@@ -405,7 +405,7 @@ void RenderWindow::drawObject(RenderPipeline& pipeline, RenderObject& object)
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
     vkCmdBindIndexBuffer(commandBuffer, object.getMesh()->getIndexBuffer(), 0, VK_INDEX_TYPE_UINT32);
 
-    uint32_t dynamicOffset = currentObject * static_cast<uint32_t>(Application::getDynamicAlignment());
+    uint32_t dynamicOffset = currentObject * static_cast<uint32_t>(RenderDevice::getDynamicAlignment());
     vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getGraphicsPipelineLayout(),
         0, 1, &pipeline.GetDescriptorSets(currentFrame), 1, &dynamicOffset);
     vkCmdDrawIndexed(commandBuffer, object.getMesh()->getIndexCount(), 1, 0, 0, 0);
@@ -437,7 +437,7 @@ void RenderWindow::display()
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(Application::getInstance()->getGraphicQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
+    if (vkQueueSubmit(RenderDevice::getInstance()->getGraphicQueue(), 1, &submitInfo, m_inFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
     
@@ -452,7 +452,7 @@ void RenderWindow::display()
     presentInfo.pImageIndices = &m_imageIndex;
     presentInfo.pResults = nullptr; // Optional
 
-    VkResult result = vkQueuePresentKHR(Application::getInstance()->getGraphicQueue(), &presentInfo);
+    VkResult result = vkQueuePresentKHR(RenderDevice::getInstance()->getGraphicQueue(), &presentInfo);
     
     if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized) {
         framebufferResized = false;

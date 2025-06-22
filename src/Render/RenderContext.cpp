@@ -1,6 +1,6 @@
 ﻿#include "RenderContext.h"
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "RenderWindow.h"
 
 
@@ -16,7 +16,7 @@ RenderContext::RenderContext(VkSurfaceKHR& surface)
 RenderContext::~RenderContext()
 {
     
-    vkDestroyCommandPool(Application::getInstance()->getDevice(), m_commandPool, nullptr);
+    vkDestroyCommandPool(RenderDevice::getInstance()->getDevice(), m_commandPool, nullptr);
 
 }
 
@@ -31,7 +31,7 @@ void RenderContext::createCommandBuffer()
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t) m_commandBuffers.size();
 
-    if (vkAllocateCommandBuffers(Application::getInstance()->getDevice(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(RenderDevice::getInstance()->getDevice(), &allocInfo, m_commandBuffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
     
@@ -40,15 +40,15 @@ void RenderContext::createCommandBuffer()
 void RenderContext::createCommandPool(VkSurfaceKHR& surface)
 {
     
-    QueueFamilyIndices queueFamilyIndices = Application::getInstance()->
-        findQueueFamilies(Application::getInstance()->getPhysicalDevice(), surface);
+    QueueFamilyIndices queueFamilyIndices = RenderDevice::getInstance()->
+        findQueueFamilies(RenderDevice::getInstance()->getPhysicalDevice(), surface);
 
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
 
-    if (vkCreateCommandPool(Application::getInstance()->getDevice(), &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(RenderDevice::getInstance()->getDevice(), &poolInfo, nullptr, &m_commandPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
     
@@ -64,7 +64,7 @@ VkCommandBuffer RenderContext::beginSingleTimeCommands()
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(Application::getInstance()->getDevice(), &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(RenderDevice::getInstance()->getDevice(), &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -85,10 +85,10 @@ void RenderContext::endSingleTimeCommands(VkCommandBuffer commandBuffer)
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
 
-    vkQueueSubmit(Application::getInstance()->getGraphicQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(Application::getInstance()->getGraphicQueue());
+    vkQueueSubmit(RenderDevice::getInstance()->getGraphicQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(RenderDevice::getInstance()->getGraphicQueue());
 
-    vkFreeCommandBuffers(Application::getInstance()->getDevice(), m_commandPool, 1, &commandBuffer);
+    vkFreeCommandBuffers(RenderDevice::getInstance()->getDevice(), m_commandPool, 1, &commandBuffer);
     
 }
 

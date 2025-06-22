@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "Mesh.h"
 #include "RenderWindow.h"
 
@@ -17,7 +17,7 @@ Shader::Shader(std::string shaderPath, Type shaderType)
     createInfo.codeSize = shaderCode.size();
     createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderCode.data());
     
-    if (vkCreateShaderModule(Application::getInstance()->getDevice(), &createInfo, nullptr, &m_shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(RenderDevice::getInstance()->getDevice(), &createInfo, nullptr, &m_shaderModule) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shader module!");
     }
 
@@ -32,7 +32,7 @@ Shader::Shader(std::string shaderPath, Type shaderType)
 Shader::~Shader()
 {
     
-    vkDestroyShaderModule(Application::getInstance()->getDevice(), m_shaderModule, nullptr);
+    vkDestroyShaderModule(RenderDevice::getInstance()->getDevice(), m_shaderModule, nullptr);
     
 }
 

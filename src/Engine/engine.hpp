@@ -5,13 +5,14 @@
 
 #include "framework.h"
 
+#include "Entity.h"
+
+#include "ECS/ecs.h"
+#include "interfaces/interfaces.h"
+#include "systems/systems.h"
+
+#include "EntityFactory.h"
 #include "GameManager.h"
 
-#include "interfaces/editor/InspectorWindow.h"
-
-#include "interfaces/nodes/NodeEditor.h"
-#include "jolt/JoltHandler.h"
-
-#include "interfaces/editor/Editor.h"
 
 #endif //ENGINE_H

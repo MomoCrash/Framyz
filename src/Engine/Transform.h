@@ -27,6 +27,8 @@ class Transform {
 public:
     Transform();
 
+    glm::mat4& getTransform();
+
     glm::vec3& getPosition();
     glm::vec3 const& forward();
     glm::vec3 backward();

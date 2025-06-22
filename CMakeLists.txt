@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 3.11.0)
 
 set(NAME FramyzEngine)
 
+# Application defines
+
+add_compile_definitions(FRAMYZ_EDITOR)
+
 message(STATUS "using ${CMAKE_GENERATOR}")
 if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
     if (NOT MINGW_PATH)

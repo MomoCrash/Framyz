@@ -5,29 +5,28 @@
 
 #include "Engine/engine.hpp"
 
+
 int main() {
 
-    // Call it to sync this window with the application
-    Application::getInstance()->Initialize("Application");
+    //test_app();
 
-    GameManager game_manager;
+    RenderSystem* render = GameManager::AddSystem<RenderSystem>();
+#ifdef FRAMYZ_EDITOR
+    Editor* editor = GameManager::AddSystem<Editor>();
+#endif
+
+    Entity* first = EntityFactory::CreateEntity();
+    EntityFactory::CreateEntity();
+    EntityFactory::CreateEntity();
+    EntityFactory::CreateEntity();
+    EntityFactory::CreateEntity();
+
+    MeshRenderer* mesh = EntityFactory::AttachComponent<MeshRenderer>(first);
+    Mesh* meshData = new Mesh(render->Window->getRenderContext(), GeometryFactory::GetPrimitive(Primitive::CUBE));
     
-    GuiHandler ui;
+    mesh->Object = new RenderObject(meshData);
 
-    Editor editor(&ui);
-
-    test_app();
-
-    while(!editor.isEditorClosed())
-    {
-        
-        glfwPollEvents();
-        
-        editor.draw();
-        
-    }
-
-    vkDeviceWaitIdle(Application::getInstance()->getDevice());
+    GameManager::Run();
     
     return 0;
     

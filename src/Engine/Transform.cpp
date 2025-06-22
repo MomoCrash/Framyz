@@ -8,6 +8,10 @@ Transform::Transform() {
     
 }
 
+glm::mat4 & Transform::getTransform() {
+    return m_transform;
+}
+
 glm::vec3& Transform::getPosition()
 {
     return m_position;

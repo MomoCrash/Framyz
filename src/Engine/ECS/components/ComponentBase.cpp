@@ -2,12 +2,12 @@
 
 #include "ComponentBase.h"
 
-ComponentBase::ComponentBase(Entity *entity)
-    : Mask(0), m_owner(entity), m_active(true) {
+ComponentBase::ComponentBase()
+    : Mask(0), Owner(nullptr), m_active(true) {
 }
 
 Entity * ComponentBase::GetOwner() const {
-    return m_owner;
+    return Owner;
 }
 
 void ComponentBase::activate() {

@@ -4,7 +4,7 @@
 
 #include <stdexcept>
 
-#include "Application.h"
+#include "RenderDevice.h"
 #include "RenderContext.h"
 #include "RenderWindow.h"
 
@@ -21,14 +21,14 @@ Texture::Texture(RenderTarget& context, std::string const& textureFile)
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    Application::getInstance()->createBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+    RenderDevice::getInstance()->createBuffer(VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
         VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory, imageSize);
 
     
     void* data;
-    vkMapMemory(Application::getInstance()->getDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(RenderDevice::getInstance()->getDevice(), stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, imageSize);
-    vkUnmapMemory(Application::getInstance()->getDevice(), stagingBufferMemory);
+    vkUnmapMemory(RenderDevice::getInstance()->getDevice(), stagingBufferMemory);
 
     stbi_image_free(pixels);
 
@@ -46,8 +46,8 @@ Texture::Texture(RenderTarget& context, std::string const& textureFile)
     copyBufferToImage(context.getRenderContext(), stagingBuffer, m_textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
     transitionImageLayout(context.getRenderContext(), m_textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-    vkDestroyBuffer(Application::getInstance()->getDevice(), stagingBuffer, nullptr);
-    vkFreeMemory(Application::getInstance()->getDevice(), stagingBufferMemory, nullptr);
+    vkDestroyBuffer(RenderDevice::getInstance()->getDevice(), stagingBuffer, nullptr);
+    vkFreeMemory(RenderDevice::getInstance()->getDevice(), stagingBufferMemory, nullptr);
 
     createTextureImageView(context);
     
@@ -55,10 +55,10 @@ Texture::Texture(RenderTarget& context, std::string const& textureFile)
 
 Texture::~Texture()
 {
-    vkDestroyImageView(Application::getInstance()->getDevice(), m_textureImageView, nullptr);
+    vkDestroyImageView(RenderDevice::getInstance()->getDevice(), m_textureImageView, nullptr);
     
-    vkDestroyImage(Application::getInstance()->getDevice(), m_textureImage, nullptr);
-    vkFreeMemory(Application::getInstance()->getDevice(), m_textureImageMemory, nullptr);
+    vkDestroyImage(RenderDevice::getInstance()->getDevice(), m_textureImage, nullptr);
+    vkFreeMemory(RenderDevice::getInstance()->getDevice(), m_textureImageMemory, nullptr);
 }
 
 VkImageView& Texture::getImageView()
@@ -84,23 +84,23 @@ void Texture::createImage(uint32_t width, uint32_t height, VkFormat format, VkIm
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateImage(Application::getInstance()->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
+    if (vkCreateImage(RenderDevice::getInstance()->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(Application::getInstance()->getDevice(), image, &memRequirements);
+    vkGetImageMemoryRequirements(RenderDevice::getInstance()->getDevice(), image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = Application::getInstance()->findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = RenderDevice::getInstance()->findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(Application::getInstance()->getDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(RenderDevice::getInstance()->getDevice(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(Application::getInstance()->getDevice(), image, imageMemory, 0);
+    vkBindImageMemory(RenderDevice::getInstance()->getDevice(), image, imageMemory, 0);
 }
 
 void Texture::createTextureImageView(RenderTarget& renderWindow)
