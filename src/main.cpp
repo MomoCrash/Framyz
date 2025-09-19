@@ -12,7 +12,8 @@ int main() {
 
     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
 #ifdef FRAMYZ_EDITOR
-    Editor* editor = GameManager::AddSystem<Editor>();
+    EditorSystem* editor = GameManager::AddSystem<EditorSystem>();
+    editor->AddRender(render);
 #endif
 
     Entity* first = EntityFactory::CreateEntity();
@@ -23,8 +24,8 @@ int main() {
 
     MeshRenderer* mesh = EntityFactory::AttachComponent<MeshRenderer>(first);
     Mesh* meshData = new Mesh(render->Window->getRenderContext(), GeometryFactory::GetPrimitive(Primitive::CUBE));
-    
     mesh->Object = new RenderObject(meshData);
+    mesh->Object->setTransform(&first->getMatrix());
 
     GameManager::Run();
     

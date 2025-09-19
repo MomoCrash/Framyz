@@ -7,13 +7,16 @@
 
 struct BaseSystem {
 
-    virtual void create() = 0;
+    virtual void preCreate();
+    virtual void create();
     virtual void update() = 0;
+
+    bool Created = false;
 
 protected:
     BaseSystem();
     virtual ~BaseSystem() = default;
-
+    
     EntityManager* m_manager;
 };
 

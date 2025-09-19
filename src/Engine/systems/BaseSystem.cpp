@@ -4,6 +4,12 @@
 
 #include "Engine/GameManager.h"
 
+void BaseSystem::preCreate() {}
+
+void BaseSystem::create() {
+    Created = true;
+}
+
 BaseSystem::BaseSystem() {
     m_manager = &GameManager::GetEntityManager();
 }

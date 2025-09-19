@@ -13,11 +13,19 @@ RenderSystem::~RenderSystem() {
     
 }
 
-void RenderSystem::create() {
+void RenderSystem::preCreate() {
     
+    BaseSystem::preCreate();
+
     RenderDevice::Initialize("Framyz Application");
 
     Window = new RenderWindow("Framyz Editor", 700, 700);
+    
+}
+
+void RenderSystem::create() {
+
+    BaseSystem::create();
 
     Shader sFragment("shader.frag", Shader::FRAGMENT);
     Shader sVertex("shader.vert", Shader::VERTEX);
@@ -55,13 +63,12 @@ void RenderSystem::update() {
         
         Entity* entity = m_manager->getEntity(i);
         if (MeshRenderer* meshRenderer = m_manager->getComponent<MeshRenderer>(entity)) {
-            glm::mat4 model = entity->getTransform().getTransform();
-            meshRenderer->Object->setTransform(model);
+            entity->update();
             
 #ifdef FRAMYZ_EDITOR
             OutTexture->drawObject(*DefaultPipeline, *meshRenderer->Object);
 #else
-            Window->drawObject(meshRenderer->Object);
+            Window->drawObject(*DefaultPipeline, *meshRenderer->Object);
 #endif
             
         }

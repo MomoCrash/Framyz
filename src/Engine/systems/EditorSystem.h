@@ -17,8 +17,7 @@ struct EditorSystem final : BaseSystem {
 private:
 
     GuiHandler*      m_gui             = nullptr;
-     
-    Editor*          m_editor          = nullptr;
+    
     InspectorWindow* m_inspectorWindow = nullptr;
     SceneWindow*     m_sceneWindow     = nullptr;
     NodeEditor*      m_nodeEditor      = nullptr;

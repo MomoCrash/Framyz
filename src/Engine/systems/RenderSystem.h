@@ -11,6 +11,7 @@ struct RenderSystem final : BaseSystem {
     RenderSystem();
     ~RenderSystem() override;
 
+    void preCreate() override;
     void create() override;
     void update() override;
 

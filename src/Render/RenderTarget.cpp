@@ -12,7 +12,7 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height)
     m_globalBuffer.view = glm::mat4(1.0f);
 
     size_t align = RenderDevice::getDynamicAlignment();
-    size_t dBufferSize = 125 * align;
+    size_t dBufferSize =  RenderPipeline::MAX_OBJECT_RENDERER * align;
     m_perObjectBuffer.model = (glm::mat4*)RenderDevice::alignedAlloc(dBufferSize, align);
     assert(m_perObjectBuffer.model);
 

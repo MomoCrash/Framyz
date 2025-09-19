@@ -9,6 +9,6 @@
 
 // Include main window
 #include "editor/InspectorWindow.h"
-#include "editor/Editor.h"
+#include "editor/SceneWindow.h"
 
 #endif //INTERFACES_H

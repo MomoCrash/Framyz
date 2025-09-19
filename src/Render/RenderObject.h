@@ -7,16 +7,16 @@ class Mesh;
 class RenderObject
 {
     Mesh* m_mesh;
-    glm::mat4 m_transform;
+    glm::mat4* m_transform;
 
 public:
 
-    RenderObject(Mesh* mesh);
+    explicit RenderObject(Mesh* mesh);
     ~RenderObject();
     
-    Mesh const* getMesh() const;
-    glm::mat4 const& getTransform() const;
+    [[nodiscard]] Mesh const* getMesh() const;
+    [[nodiscard]] glm::mat4 const& getTransform() const;
 
-    void setTransform(glm::mat4& transform);
+    void setTransform(glm::mat4* transform);
     
 };

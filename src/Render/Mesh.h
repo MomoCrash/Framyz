@@ -2,6 +2,8 @@
 
 #include "framework.h"
 
+#include <array>
+
 class RenderContext;
 
 struct Vertex

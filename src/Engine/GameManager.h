@@ -42,10 +42,12 @@ private:
 
 template<typename System>
 System* GameManager::AddSystem() {
+    
     System* system = new System();
     GetInstance().m_systems.push_back(system);
-    system->create();
+    system->preCreate();
     return system;
+    
 }
 
 

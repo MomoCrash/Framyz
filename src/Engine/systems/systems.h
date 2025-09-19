@@ -6,6 +6,11 @@
 #include "BaseSystem.h"
 
 #include "PhysicSystem.h"
+
+#ifdef FRAMYZ_EDITOR
+#include "EditorSystem.h"
+#endif
+
 #include "RenderSystem.h"
 
 #endif //SYSTEMS_H

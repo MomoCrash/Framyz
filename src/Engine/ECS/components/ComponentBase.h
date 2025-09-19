@@ -8,7 +8,9 @@
 class Entity;
 
 enum class ComponentType : uint64_t {
+    
     MeshRenderer,
+    
 };
 
 class ComponentBase {
@@ -43,6 +45,7 @@ struct Component : ComponentBase
     }
     
     static constexpr ComponentType TypeID = typeID;
+    static constexpr uint64_t ComponentMask = 1 << static_cast<uint64_t>(typeID);
 };
 
 #define DECLARE_COMPONENT( name, parent ) struct name : parent<ComponentType::name>

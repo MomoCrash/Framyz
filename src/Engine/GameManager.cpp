@@ -21,12 +21,13 @@ void GameManager::Run() {
     manager.m_isRunning = true;
     
     while (manager.m_isRunning) {
-        
-        for (auto* system : manager.m_systems) {
-            system->update();
-        }
 
         manager.m_gameManager.update();
+        
+        for (auto* system : manager.m_systems) {
+            if (!system->Created) system->create();
+            system->update();
+        }
         
     }
     

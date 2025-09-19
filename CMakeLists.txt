@@ -22,6 +22,18 @@ endif()
 
 project(${NAME} VERSION 0.0.1)
 
+# Appliquer le runtime dynamique (/MD et /MDd) pour MSVC
+if (MSVC)
+    message(STATUS "Forcing dynamic runtime (/MD and /MDd) for MSVC")
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL" CACHE STRING "" FORCE)
+endif()
+
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebugDLL" CACHE STRING "" FORCE)
+endif()
+
+message(STATUS "MSVC Runtime: ${CMAKE_MSVC_RUNTIME_LIBRARY}")
+
 # 1. Set VULKAN_SDK_PATH in .env.cmake to target specific vulkan version
 if (DEFINED VULKAN_SDK_PATH)
     set(Vulkan_INCLUDE_DIRS "${VULKAN_SDK_PATH}/Include") # 1.1 Make sure this include path is correct
@@ -52,6 +64,8 @@ if(NOT glfw_POPULATED)
 
     set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "Build the GLFW example programs")
     set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
+    set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "Build the GLFW test programs")
+    set(GLFW_BUILD_SHARED_LIBS ON) # <--- IMPORTANT
 endif()
 
 include(AddIMGUI.cmake)

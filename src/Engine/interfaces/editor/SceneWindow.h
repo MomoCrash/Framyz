@@ -5,15 +5,22 @@
 
 #include "../../framework.h"
 
+struct RenderSystem;
+
 class SceneWindow {
 
 public:
     SceneWindow();
     ~SceneWindow();
 
-    void draw(RenderWindow* window);
+    void draw();
 
-    VkDescriptorSet renderedImages[RenderWindow::MAX_FRAMES_IN_FLIGHT];
+    void setRenderWindow(RenderSystem* renderWindow);
+    void setRenderImage(VkImageView image, uint32_t index);
+
+private:
+    VkDescriptorSet m_renderedImages[RenderWindow::MAX_FRAMES_IN_FLIGHT];
+    RenderSystem* m_renderWindow;
 
 };
 

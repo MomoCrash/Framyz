@@ -57,8 +57,9 @@ C* EntityManager::getComponent(Entity* entity) {
 
     if (entity->isCreated()) {
         EntityComponentPair* pair = m_entities[*entity->getId()];
-        for (ComponentBase* comp : pair->AttachedComponents) {
-            if (comp->Mask & static_cast<uint64_t>(C::TypeID) ) {
+        for (int i = 0; i < pair->AttachedComponents.size(); i++) {
+            ComponentBase* comp = pair->AttachedComponents.at(i);
+            if (comp->Mask & C::ComponentMask ) {
                 return dynamic_cast<C*>(comp);
             }
         }
@@ -87,7 +88,8 @@ C* EntityManager::attachComponent(Entity* entity)  {
         pair = m_entities[*entity->getId()];
     else
         pair = m_entitiesToAdd[*entity->getId()];
-    
+
+    entity->attachComponent(newComponent->Mask);
     pair->AttachedComponents.push_back(newComponent);
     return newComponent;
 }
