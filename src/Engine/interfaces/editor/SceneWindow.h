@@ -3,20 +3,25 @@
 #ifndef SCENEWINDOW_H
 #define SCENEWINDOW_H
 
+#include "../IEditorWindow.h"
 #include "../../framework.h"
 
 struct RenderSystem;
 
-class SceneWindow {
+class SceneWindow : IEditorWindow {
 
 public:
     SceneWindow();
     ~SceneWindow();
 
-    void draw();
 
     void setRenderWindow(RenderSystem* renderWindow);
     void setRenderImage(VkImageView image, uint32_t index);
+
+    void open() override;
+    void close() override;
+    void draw() override;
+    
 
 private:
     VkDescriptorSet m_renderedImages[RenderWindow::MAX_FRAMES_IN_FLIGHT];

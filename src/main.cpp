@@ -11,6 +11,7 @@ int main() {
     //test_app();
 
     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
+
 #ifdef FRAMYZ_EDITOR
     EditorSystem* editor = GameManager::AddSystem<EditorSystem>();
     editor->AddRender(render);

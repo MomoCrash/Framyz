@@ -8,6 +8,31 @@ SceneWindow::SceneWindow() {}
 
 SceneWindow::~SceneWindow() {}
 
+/**
+ * Set the scene render
+ * @param renderWindow scene window
+ */
+void SceneWindow::setRenderWindow(RenderSystem *renderWindow) {
+    m_renderWindow = renderWindow;
+}
+
+/**
+ * Set the render image
+ * @param image image index
+ * @param index index in swapchain
+ */
+void SceneWindow::setRenderImage(VkImageView image, uint32_t index) {
+    m_renderedImages[index] = ImGui_ImplVulkan_AddTexture(m_renderWindow->DefaultSampler->getSampler(), image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+}
+
+
+void SceneWindow::open() {
+}
+
+void SceneWindow::close() {
+}
+
+
 void SceneWindow::draw() {
     
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -22,12 +47,4 @@ void SceneWindow::draw() {
     ImGui::Image((ImTextureID)m_renderedImages[m_renderWindow->Window->getRenderContext().getCurrentFrame()], ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::End();
     
-}
-
-void SceneWindow::setRenderWindow(RenderSystem *renderWindow) {
-    m_renderWindow = renderWindow;
-}
-
-void SceneWindow::setRenderImage(VkImageView image, uint32_t index) {
-    m_renderedImages[index] = ImGui_ImplVulkan_AddTexture(m_renderWindow->DefaultSampler->getSampler(), image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 }

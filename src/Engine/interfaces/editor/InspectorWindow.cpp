@@ -2,12 +2,15 @@
 
 #include "Engine/GameManager.h"
 
-InspectorWindow::InspectorWindow()
-{
-}
+InspectorWindow::InspectorWindow(): m_inspectedObject(nullptr) {}
 
 InspectorWindow::~InspectorWindow()
 {
+}
+
+void InspectorWindow::setInspectedObject(Entity* entity)
+{
+    m_inspectedObject = entity;
 }
 
 void InspectorWindow::draw()
@@ -55,7 +58,8 @@ void InspectorWindow::draw()
     
 }
 
-void InspectorWindow::setInspectedObject(Entity* entity)
-{
-    m_inspectedObject = entity;
+void InspectorWindow::close() {
+}
+
+void InspectorWindow::open() {
 }

@@ -19,6 +19,9 @@ void NodeEditor::open()
     m_isOpen = true;
 }
 
+void NodeEditor::close() {
+}
+
 void NodeEditor::draw()
 {
 

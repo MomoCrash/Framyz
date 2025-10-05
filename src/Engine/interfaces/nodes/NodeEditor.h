@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "../../framework.h"
+#include "Engine/interfaces/IEditorWindow.h"
 
 
-struct NodeEditor : ImFlow::BaseNode
+struct NodeEditor : ImFlow::BaseNode, IEditorWindow
 {
     ImFlow::ImNodeFlow mINF;
     RenderWindow* window;
@@ -15,8 +16,8 @@ struct NodeEditor : ImFlow::BaseNode
     NodeEditor(GuiHandler* handler);
     ~NodeEditor();
 
-    void open();
-    void close();
-    void draw();
+    void open() override;
+    void close() override;
+    void draw() override;
     
 };
