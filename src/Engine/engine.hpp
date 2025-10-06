@@ -5,6 +5,7 @@
 
 #include "framework.h"
 
+#include "Engine/asset/AssetLoader.h"
 #include "Entity.h"
 
 #include "ECS/ecs.h"

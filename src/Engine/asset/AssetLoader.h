@@ -2,26 +2,27 @@
 
 #ifndef ASSETLOADER_H
 #define ASSETLOADER_H
-#include "Engine/systems/RenderSystem.h"
+#include <map>
+
+struct RenderSystem;
+class Mesh;
 
 class Asset {
     
 public:
     enum class Render {
         CUBE,
-
         
     };
 
 };
 
-
 class AssetLoader {
 public:
     static AssetLoader& GetInstance();
     
-    bool loadRenderAsset(RenderSystem const*) ;
-    Mesh* getRenderAsset(Asset::Render render);
+    static bool loadRenderAsset(RenderSystem*) ;
+    static Mesh* getRenderAsset(Asset::Render render);
 
 private:
     std::map<Asset::Render, Mesh*> RenderAssets;

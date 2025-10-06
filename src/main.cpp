@@ -4,7 +4,6 @@
 #include <stb_image.h>
 
 #include "Engine/engine.hpp"
-#include "Engine/assets/AssetLoader.h"
 
 
 int main() {
@@ -12,7 +11,7 @@ int main() {
     //test_app();
 
     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
-    AssetLoader::GetInstance().loadRenderAsset(render);
+    AssetLoader::loadRenderAsset(render);
 
 #ifdef FRAMYZ_EDITOR
     EditorSystem* editor = GameManager::AddSystem<EditorSystem>();

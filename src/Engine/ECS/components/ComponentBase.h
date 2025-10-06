@@ -48,8 +48,9 @@ public:
 
 protected:
     Entity* Owner;
-
     bool m_active;
+
+    friend class EntityManager;
     
     
 };

@@ -3,10 +3,10 @@
 #include "MeshRenderer.h"
 
 #include "Engine/GameManager.h"
-#include "Engine/assets/AssetLoader.h"
+#include "Engine/asset/AssetLoader.h"
 #include "Engine/systems/RenderSystem.h"
 
-MeshRenderer::MeshRenderer(): Object(nullptr) {
+MeshRenderer::MeshRenderer() : Object(nullptr) {
 }
 
 void MeshRenderer::display() {
@@ -20,6 +20,6 @@ void MeshRenderer::display() {
 void MeshRenderer::instantiate() {
     Component::instantiate();
     
-    Object = new RenderObject(AssetLoader::GetInstance().getRenderAsset(Asset::Render::CUBE));
+    Object = new RenderObject(AssetLoader::getRenderAsset(Asset::Render::CUBE));
     Object->setTransform(&Owner->getMatrix());
 }

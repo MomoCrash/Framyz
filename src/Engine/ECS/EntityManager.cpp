@@ -86,7 +86,8 @@ std::vector<ComponentBase *> const & EntityManager::getComponents(Entity* index)
 
 void EntityManager::attachComponent(ComponentBase *base, Entity *entity) {
     if (entity->hasComponent(base->Mask)) return;
-    
+
+    base->Owner = entity;
     EntityComponentPair* pair;
     
     if (entity->isCreated())

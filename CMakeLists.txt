@@ -75,6 +75,7 @@ include(AddJolt.cmake)
 include_directories(external)
 
 file(GLOB_RECURSE SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+message(STATUS "SOURCES: ${SOURCES}")
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${IM_GUI_LIB} ${IMNODEFLOW_LIB})
 
