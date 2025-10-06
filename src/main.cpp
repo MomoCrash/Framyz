@@ -4,6 +4,7 @@
 #include <stb_image.h>
 
 #include "Engine/engine.hpp"
+#include "Engine/assets/AssetLoader.h"
 
 
 int main() {
@@ -11,6 +12,7 @@ int main() {
     //test_app();
 
     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
+    AssetLoader::GetInstance().loadRenderAsset(render);
 
 #ifdef FRAMYZ_EDITOR
     EditorSystem* editor = GameManager::AddSystem<EditorSystem>();
@@ -22,11 +24,11 @@ int main() {
     EntityFactory::CreateEntity();
     EntityFactory::CreateEntity();
     EntityFactory::CreateEntity();
-
-    MeshRenderer* mesh = EntityFactory::AttachComponent<MeshRenderer>(first);
-    Mesh* meshData = new Mesh(render->Window->getRenderContext(), GeometryFactory::GetPrimitive(Primitive::CUBE));
-    mesh->Object = new RenderObject(meshData);
-    mesh->Object->setTransform(&first->getMatrix());
+    //
+    // MeshRenderer* mesh = EntityFactory::AttachComponent<MeshRenderer>(first);
+    // Mesh* meshData = new Mesh(render->Window->getRenderContext(), GeometryFactory::GetPrimitive(Primitive::CUBE));
+    // mesh->Object = new RenderObject(meshData);
+    // mesh->Object->setTransform(&first->getMatrix());
 
     GameManager::Run();
     

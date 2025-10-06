@@ -8,6 +8,8 @@
 class IEditorWindow {
 
 public:
+    virtual ~IEditorWindow() = default;
+
     virtual void open() = 0;
     virtual void close() = 0;
     virtual void draw() = 0;

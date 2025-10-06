@@ -2,6 +2,8 @@
 
 #include "ComponentBase.h"
 
+#include "MeshRenderer.h"
+
 ComponentBase::ComponentBase()
     : Mask(0), Owner(nullptr), m_active(true) {
 }
@@ -20,4 +22,11 @@ void ComponentBase::deactivate() {
 
 bool ComponentBase::isActive() const {
     return m_active;
+}
+
+void ComponentBase::display() {
+    
+}
+
+void ComponentBase::instantiate() {
 }

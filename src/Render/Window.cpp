@@ -27,6 +27,7 @@ void window_focus_callback(GLFWwindow* window, int focused)
         glfwSetMouseButtonCallback(window, mouse_button_callback);
         glfwSetScrollCallback(window, scroll_callback);
     }
+    ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
 
 Window::Window(const char* title, const int width, const int height)

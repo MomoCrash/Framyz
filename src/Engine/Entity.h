@@ -3,6 +3,8 @@
 #ifndef ENTITY_H
 #define ENTITY_H
 
+class ComponentBase;
+class EntityManager;
 #include "Transform.h"
 
 class Entity : public Transform
@@ -12,11 +14,9 @@ public:
     Entity(Entity* parent);
     ~Entity();
     
-    template <typename Type>
-    [[nodiscard]] Type& getComponent(uint32_t componentId);
+    [[nodiscard]] ComponentBase* getComponent(uint32_t componentId);
+    [[nodiscard]] std::vector<ComponentBase*> const& getComponents();
     [[nodiscard]] bool hasComponent(uint32_t componentId) const;
-    void attachComponent(uint32_t componentId);
-    void removeComponent(uint32_t componentId);
 
     void preLoad(int id);
     void create(int id);
@@ -41,14 +41,14 @@ protected:
 
     uint32_t m_component;
     uint32_t m_tag;
+
+    void attachComponent(uint32_t componentId);
+    void removeComponent(uint32_t componentId);
     
 private:
     Transform m_transform;
-};
 
-template<typename Type>
-Type & Entity::getComponent(uint32_t componentId) {
-    return nullptr; // TODO Link with ECS
-}
+    friend EntityManager;
+};
 
 #endif //ENTITY_H

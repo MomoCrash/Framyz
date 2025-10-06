@@ -5,12 +5,16 @@
 
 #include "GameManager.h"
 #include "ECS/EntityManager.h"
+#include "ECS/components/MeshRenderer.h"
 
 struct EntityFactory {
 
     static Entity* CreateEntity();
     template <typename C>
     static C* AttachComponent(Entity* entityId);
+
+    static ComponentBase* CreateComponent(ComponentType type);
+    static ComponentBase* AttachComponent(ComponentType type, Entity* entityId);
 
 };
 

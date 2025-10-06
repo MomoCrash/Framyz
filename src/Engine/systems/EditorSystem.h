@@ -23,6 +23,8 @@ private:
     NodeEditor*      m_nodeEditor      = nullptr;
      
     RenderSystem*    m_renderSystem    = nullptr;
+
+    int m_guiIndex;
     
 };
 

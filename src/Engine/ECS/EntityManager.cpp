@@ -84,6 +84,21 @@ std::vector<ComponentBase *> const & EntityManager::getComponents(Entity* index)
     return m_entities[*index->getId()]->AttachedComponents;
 }
 
+void EntityManager::attachComponent(ComponentBase *base, Entity *entity) {
+    if (entity->hasComponent(base->Mask)) return;
+    
+    EntityComponentPair* pair;
+    
+    if (entity->isCreated())
+        pair = m_entities[*entity->getId()];
+    else
+        pair = m_entitiesToAdd[*entity->getId()];
+
+    entity->attachComponent(base->Mask);
+    pair->AttachedComponents.push_back(base);
+    base->instantiate();
+}
+
 int EntityManager::getEntityCount() const {
     return m_entityCount;
 }

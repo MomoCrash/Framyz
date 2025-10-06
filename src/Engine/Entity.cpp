@@ -2,6 +2,8 @@
 
 #include "Entity.h"
 
+#include "GameManager.h"
+
 Entity::Entity()
     : m_component(0), m_tag(0), m_isCreated(false), m_isDestoyed(false), m_id(0) {}
 
@@ -9,6 +11,16 @@ Entity::Entity(Entity *parent)
     : m_component(0), m_tag(0), m_isCreated(false), m_isDestoyed(false), m_id(0) {}
 
 Entity::~Entity() {}
+
+ComponentBase * Entity::getComponent(uint32_t componentId) {
+    //return GameManager::GetEntityManager().getComponent(this);
+    return nullptr;
+}
+
+std::vector<ComponentBase *> const& Entity::getComponents() {
+    return GameManager::GetEntityManager().getComponents(this);
+    
+}
 
 /// Check if the entity has the current component attach to it
 /// @param componentId mask of the component

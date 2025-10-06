@@ -34,6 +34,7 @@ public:
     C* getComponent(Entity* entity) ;
     template<typename C>
     C* attachComponent(Entity* entity) ;
+    void attachComponent(ComponentBase* base, Entity* entity) ;
 
     int getEntityCount() const;
 
@@ -82,15 +83,8 @@ C* EntityManager::attachComponent(Entity* entity)  {
         return component;
     
     C* newComponent = new C();
-    EntityComponentPair* pair;
     
-    if (entity->isCreated())
-        pair = m_entities[*entity->getId()];
-    else
-        pair = m_entitiesToAdd[*entity->getId()];
-
-    entity->attachComponent(newComponent->Mask);
-    pair->AttachedComponents.push_back(newComponent);
+    EntityManager::attachComponent(newComponent, entity);
     return newComponent;
 }
 

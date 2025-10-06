@@ -8,6 +8,9 @@
 DECLARE_COMPONENT( MeshRenderer, Component )
 {
     MeshRenderer();
+    
+    void display() override;
+    void instantiate() override;
 
     RenderObject* Object;
 };

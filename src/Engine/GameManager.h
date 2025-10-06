@@ -22,6 +22,8 @@ public:
     static void Run();
     template <typename System>
     static System* AddSystem();
+    // template <typename System>
+    // static System* GetSystem();
     static void Update();
 
     static void Shutdown();
@@ -36,6 +38,7 @@ private:
     static EntityManager& GetEntityManager();
 
     friend EntityFactory;
+    friend Entity;
     friend BaseSystem;
 
 };
@@ -49,6 +52,17 @@ System* GameManager::AddSystem() {
     return system;
     
 }
+
+// template<typename System>
+// System * GameManager::GetSystem() {
+//
+//     for (auto m_system : GetInstance().m_systems) {
+//         if (System* returnedSystem = dynamic_cast<System*>(m_system)) {
+//             return returnedSystem;
+//         }
+//     }
+//     return nullptr;
+// }
 
 
 #endif //GAMEMANAGER_H

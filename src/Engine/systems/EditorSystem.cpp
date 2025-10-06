@@ -11,7 +11,7 @@ void EditorSystem::create() {
     RenderDevice::Initialize("Application");
     
     m_gui = new GuiHandler();
-    m_gui->inject(m_renderSystem->Window);
+    m_guiIndex = m_gui->inject(m_renderSystem->Window);
     
     m_inspectorWindow = new InspectorWindow();
     m_inspectorWindow->setInspectedObject(m_manager->getEntity(0));
@@ -31,6 +31,8 @@ void EditorSystem::update() {
 
     m_renderSystem->Window->beginDraw();
 
+    m_gui->setContext(m_guiIndex);
+    
     ImGui_ImplVulkan_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -45,7 +47,7 @@ void EditorSystem::update() {
     ImGui::SetNextWindowPos(viewport->WorkPos);
     ImGui::SetNextWindowSize(viewport->WorkSize);
     ImGui::SetNextWindowViewport(viewport->ID);
-
+    
     // Set the parent window's styles to match that of the main viewport:
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f); // No corner rounding on the window
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // No border around the window
@@ -67,10 +69,28 @@ void EditorSystem::update() {
 
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::BeginMenu("Window"))
+
+        if (ImGui::BeginMenu("File"))
         {
             ImGui::EndMenu();
         }
+
+
+        if (ImGui::BeginMenu("Tools"))
+        {
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu("Window"))
+        {
+            
+            if (ImGui::MenuItem("Nodyz Editor")) {
+                m_nodeEditor->open();
+            }
+            ImGui::EndMenu();
+            
+        }
+
 
         ImGui::EndMenuBar();
 
@@ -78,7 +98,6 @@ void EditorSystem::update() {
     
     ImGui::End();
 
-    m_nodeEditor->draw();
     m_inspectorWindow->draw();
     m_sceneWindow->draw();
 
@@ -90,6 +109,8 @@ void EditorSystem::update() {
 
     m_renderSystem->Window->endDraw();
     m_renderSystem->Window->display();
+
+    m_nodeEditor->draw();
 
 }
 

@@ -3,15 +3,30 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
+#include "defines.h"
 #include "../../framework.h"
 
 class Entity;
 
+#define COMPONENT_ENUM_SET  \
+    VALUE(MeshRenderer)     \
+
 enum class ComponentType : uint64_t {
+    #define VALUE(name) name,
+    COMPONENT_ENUM_SET
+    #undef VALUE
     
-    MeshRenderer,
-    
+    Size,
 };
+
+inline std::string to_string(ComponentType c) {
+    switch (c) {
+        #define VALUE(name) case ComponentType::name: return #name;
+        COMPONENT_ENUM_SET
+        #undef VALUE
+        default: return "UNKNOWN";
+    }
+}
 
 class ComponentBase {
     
@@ -26,11 +41,13 @@ public:
 
     [[nodiscard]] bool isActive() const;
 
+    virtual void display();
+    virtual void instantiate();
+
     uint64_t Mask;
-    Entity* Owner;
-    
 
 protected:
+    Entity* Owner;
 
     bool m_active;
     
