@@ -24,7 +24,7 @@ bool ComponentBase::isActive() const {
     return m_active;
 }
 
-void ComponentBase::display() {
+void ComponentBase::EDITOR_Display() {
     
 }
 

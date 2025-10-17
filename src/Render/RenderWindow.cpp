@@ -314,7 +314,7 @@ void RenderWindow::update(float width, float height)
     
     frameCounter++;
 
-    m_globalBuffer.view = glm::lookAt(glm::vec3(-5.0f, 3.0f,  -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    m_globalBuffer.view = glm::lookAt(glm::vec3(0.0f, 0.0f,  -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     m_globalBuffer.proj = glm::perspective(glm::radians(70.0f), width / height, 0.1f, 256.0f);
     m_globalBuffer.proj[1][1] *= -1.0f;
     

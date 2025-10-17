@@ -10,6 +10,7 @@ class Entity;
 
 #define COMPONENT_ENUM_SET  \
     VALUE(MeshRenderer)     \
+    VALUE(Camera)           \
 
 enum class ComponentType : uint64_t {
     #define VALUE(name) name,
@@ -41,7 +42,7 @@ public:
 
     [[nodiscard]] bool isActive() const;
 
-    virtual void display();
+    virtual void EDITOR_Display();
     virtual void instantiate();
 
     uint64_t Mask;

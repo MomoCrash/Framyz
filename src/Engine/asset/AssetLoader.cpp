@@ -11,8 +11,11 @@ AssetLoader & AssetLoader::GetInstance() {
 
 bool AssetLoader::loadRenderAsset(RenderSystem* render) {
     
-    GetInstance().RenderAssets[Asset::Render::CUBE] = new Mesh(render->Window->getRenderContext(),
+    GetInstance().RenderAssets[Asset::Render::CUBE] = new Mesh("Cube", render->Window->getRenderContext(),
         GeometryFactory::GetPrimitive(Primitive::CUBE));
+
+    GetInstance().RenderAssets[Asset::Render::PLANE] = new Mesh("Plane", render->Window->getRenderContext(),
+    GeometryFactory::GetPrimitive(Primitive::PLANE));
 
     return true;
     

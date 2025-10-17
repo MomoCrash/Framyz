@@ -21,3 +21,7 @@ glm::mat4 const& RenderObject::getTransform() const
 {
     return *m_transform;
 }
+
+void RenderObject::setMesh(Mesh *mesh) {
+    m_mesh = mesh;
+}

@@ -21,7 +21,8 @@ void InspectorWindow::updateParameters()
 {
     m_options.clear();
     for (int i = 0; i < static_cast<int>(ComponentType::Size); i++) {
-        m_options.push_back(to_string(static_cast<ComponentType>(i)));
+        if (!m_inspectedObject->hasComponent(i))
+            m_options.push_back(to_string(static_cast<ComponentType>(i)));
     }
 }
 
@@ -60,15 +61,22 @@ void InspectorWindow::draw()
     }
 
     if (hasSelected) {
+        ImGui::SameLine(0, 10);
         if (ImGui::Button("Create")) {
 
             EntityFactory::AttachComponent(static_cast<ComponentType>(currentIndex), m_inspectedObject);
-            
+            hasSelected = false;
+            updateParameters();
         }
     }
 
+    ImGui::SeparatorText("Transform");
+    ImGui::DragFloat("X", &m_inspectedObject->getPosition().x, 1);
+    ImGui::DragFloat("Y", &m_inspectedObject->getPosition().y, 1);
+    ImGui::DragFloat("Z", &m_inspectedObject->getPosition().z, 1);
+
     for (auto component : m_inspectedObject->getComponents()) {
-        
+        component->EDITOR_Display();
     }
     
     // std::string position;

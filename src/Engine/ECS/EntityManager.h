@@ -35,6 +35,7 @@ public:
     template<typename C>
     C* attachComponent(Entity* entity) ;
     void attachComponent(ComponentBase* base, Entity* entity) ;
+    void removeComponent(ComponentBase* base, Entity* entity) ;
 
     int getEntityCount() const;
 

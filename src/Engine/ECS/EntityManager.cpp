@@ -100,6 +100,27 @@ void EntityManager::attachComponent(ComponentBase *base, Entity *entity) {
     base->instantiate();
 }
 
+void EntityManager::removeComponent(ComponentBase *base, Entity *entity) {
+    if (!entity->hasComponent(base->Mask)) return;
+    
+    EntityComponentPair* pair;
+    
+    if (entity->isCreated())
+        pair = m_entities[*entity->getId()];
+    else
+        pair = m_entitiesToAdd[*entity->getId()];
+    
+    entity->removeComponent(base->Mask);
+    for (int i = 0; i < pair->AttachedComponents.size(); i++) {
+        if (pair->AttachedComponents[i]->Mask & base->Mask) {
+            base->deactivate();
+            delete pair->AttachedComponents[i];
+            pair->AttachedComponents.erase(pair->AttachedComponents.begin() + i);
+            break;
+        }
+    }
+}
+
 int EntityManager::getEntityCount() const {
     return m_entityCount;
 }

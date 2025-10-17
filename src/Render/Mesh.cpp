@@ -8,9 +8,10 @@ Vertex::Vertex(): position(0, 0, 0), normal(0, 0, 0), texCoords(0, 0) {}
 Vertex::Vertex(float x, float y, float z, float xN, float yN, float zN, float xT, float yT)
     : position(x, y, z), normal(xN, yN, zN), texCoords(xT, yT) {}
 
-Mesh::Mesh(RenderContext& context, MeshData* dMesh) : m_vertexBuffer(nullptr)
+Mesh::Mesh(const char* assetName, RenderContext& context, MeshData* dMesh) : m_vertexBuffer(nullptr)
 {
-    
+
+    m_assetName = assetName;
     m_meshData = dMesh;
 
     uint64_t vSize = sizeof(dMesh->Vertices[0]) * dMesh->Vertices.size();
@@ -79,4 +80,8 @@ std::vector<Vertex> const& Mesh::getVertices() const
 glm::uint32 Mesh::getIndexCount() const
 {
     return m_meshData->Indices.size();
+}
+
+const char * Mesh::getAssetName() const {
+    return m_assetName;
 }

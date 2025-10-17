@@ -8,15 +8,7 @@ Entity* EntityFactory::CreateEntity() {
 
 ComponentBase * EntityFactory::CreateComponent(ComponentType type) {
 
-    //  TODO : fixme (CreateComponent)
-    //  I'm not sure is this a good method to auto implement
-    //  new component when I add one in ComponentType enum
-    switch (static_cast<int>(type)) {
-        #define VALUE(name) case static_cast<int>(ComponentType::name): return new name();
-        COMPONENT_ENUM_SET
-        #undef VALUE
-        default: return nullptr;
-    }
+    return EntityFactory::GetInstance()->ComponentBuilder[static_cast<int>(type)]();
     
 }
 
@@ -26,4 +18,8 @@ ComponentBase * EntityFactory::AttachComponent(ComponentType type, Entity *entit
     GameManager::GetEntityManager().attachComponent(base, entityId);
     return base;
     
+}
+
+void EntityFactory::RemoveComponent(ComponentBase *component) {
+    GameManager::GetEntityManager().removeComponent(component, component->GetOwner());
 }

@@ -54,7 +54,7 @@ struct MeshData
 
 class Mesh
 {
-    
+    const char* m_assetName;
     MeshData* m_meshData;
     
     VkBuffer m_vertexBuffer;
@@ -64,12 +64,14 @@ class Mesh
     VkDeviceMemory m_indexBufferUploader;
 
 public:
-    Mesh(RenderContext& window, MeshData* data);
+    Mesh(const char* assetName, RenderContext& window, MeshData* data);
     ~Mesh();
 
-    VkBuffer const& getVertexBuffer() const;
-    VkBuffer const& getIndexBuffer() const;
-    std::vector<Vertex> const& getVertices() const;
-    glm::uint32 getIndexCount() const;
+    [[nodiscard]] VkBuffer const& getVertexBuffer() const;
+    [[nodiscard]] VkBuffer const& getIndexBuffer() const;
+    [[nodiscard]] std::vector<Vertex> const& getVertices() const;
+    [[nodiscard]] glm::uint32 getIndexCount() const;
+    
+    [[nodiscard]] const char* getAssetName() const;
     
 };

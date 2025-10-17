@@ -2,14 +2,14 @@
 
 #ifndef MESHRENDERER_H
 #define MESHRENDERER_H
-#include "ComponentBase.h"
 
+#include "ComponentBase.h"
 
 DECLARE_COMPONENT( MeshRenderer, Component )
 {
     MeshRenderer();
     
-    void display() override;
+    void EDITOR_Display() override;
     void instantiate() override;
 
     RenderObject* Object;

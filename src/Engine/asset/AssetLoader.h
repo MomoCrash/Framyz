@@ -12,7 +12,7 @@ class Asset {
 public:
     enum class Render {
         CUBE,
-        
+        PLANE,
     };
 
 };
