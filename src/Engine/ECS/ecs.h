@@ -5,6 +5,7 @@
 
 #include "components/ComponentBase.h"
 #include "components/MeshRenderer.h"
+#include "components/Camera.h"
 
 #include "EntityManager.h"
 

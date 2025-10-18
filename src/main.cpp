@@ -10,24 +10,13 @@ int main() {
 
     //test_app();
 
-//     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
-//     AssetLoader::loadRenderAsset(render);
-//
-// #ifdef FRAMYZ_EDITOR
-//     EditorSystem* editor = GameManager::AddSystem<EditorSystem>();
-//     editor->AddRender(render);
-// #endif
+    RenderSystem* render = GameManager::AddSystem<RenderSystem>();
+    AssetLoader::loadRenderAsset(render);
 
-    Entity* first = EntityFactory::CreateEntity();
-    EntityFactory::CreateEntity();
-    EntityFactory::CreateEntity();
-    EntityFactory::CreateEntity();
-    EntityFactory::CreateEntity();
-    //
-    // MeshRenderer* mesh = EntityFactory::AttachComponent<MeshRenderer>(first);
-    // Mesh* meshData = new Mesh(render->Window->getRenderContext(), GeometryFactory::GetPrimitive(Primitive::CUBE));
-    // mesh->Object = new RenderObject(meshData);
-    // mesh->Object->setTransform(&first->getMatrix());
+#ifdef FRAMYZ_EDITOR
+    EditorSystem* editor = GameManager::AddSystem<EditorSystem>();
+    editor->AddRender(render);
+#endif
 
     GameManager::Run();
     

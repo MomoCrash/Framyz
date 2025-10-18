@@ -17,17 +17,21 @@ private:
     static ComponentBase* CreateComponent() {
         return new Type();
     }
-    
-    const std::function<ComponentBase* ()>* ComponentBuilder = new std::function<ComponentBase * ()>[static_cast<int>(ComponentType::Size)] {
-        #define VALUE(name) EntityFactory::CreateComponent<name>,
-        COMPONENT_ENUM_SET
-        #undef VALUE
-    };
 
     static EntityFactory* GetInstance() {
         static EntityFactory factory;
         return &factory;
     }
+
+    const std::function<ComponentBase* ()>* ComponentBuilder = new std::function<ComponentBase * ()>[static_cast<int>(ComponentType::Size)] {
+        // #define VALUE(name) EntityFactory::CreateComponent<name>,
+        // COMPONENT_ENUM_SET
+        // #undef VALUE
+
+        EntityFactory::CreateComponent<MeshRenderer>,
+        EntityFactory::CreateComponent<Camera>,
+        
+    };
 
 public:
     static Entity* CreateEntity();

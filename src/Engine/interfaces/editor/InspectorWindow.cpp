@@ -30,6 +30,7 @@ void InspectorWindow::draw()
 {
 
     if (m_inspectedObject == nullptr) return;
+    if (!m_inspectedObject->isCreated()) return;
 
     ImGui::Begin("Object Inspector");
 
@@ -71,47 +72,19 @@ void InspectorWindow::draw()
     }
 
     ImGui::SeparatorText("Transform");
-    ImGui::DragFloat("X", &m_inspectedObject->getPosition().x, 1);
-    ImGui::DragFloat("Y", &m_inspectedObject->getPosition().y, 1);
-    ImGui::DragFloat("Z", &m_inspectedObject->getPosition().z, 1);
+    static float* position[3] = { &m_inspectedObject->getPosition().x, &m_inspectedObject->getPosition().y, &m_inspectedObject->getPosition().z};
+    ImGui::DragFloat3("Position", *position, 0.1);
+    static float* rotation[3] = { &m_inspectedObject->getRotation().x, &m_inspectedObject->getRotation().y, &m_inspectedObject->getRotation().z};
+    glm::vec3 oldRotation = glm::vec3(m_inspectedObject->getRotation());
+    if (ImGui::DragFloat3("Rotation", *rotation, 0.1)) {
+        glm::vec3 newRotation = oldRotation - m_inspectedObject->getRotation();
+        m_inspectedObject->rotateYPR(newRotation);
+    }
 
+    
     for (auto component : m_inspectedObject->getComponents()) {
         component->EDITOR_Display();
     }
-    
-    // std::string position;
-    // ImGui::Text("Transform");
-    // position = "X : " + std::to_string(m_inspectedObject->getPosition().x);
-    // ImGui::Text(position.c_str());
-    // ImGui::SameLine();
-    // position = "Y : " + std::to_string(m_inspectedObject->getPosition().y);
-    // ImGui::Text(position.c_str());
-    // ImGui::SameLine();
-    // position = "Z : " + std::to_string(m_inspectedObject->getPosition().z);
-    // ImGui::Text(position.c_str());
-    //
-    // if (ImGui::Button("Move forward"))
-    // {
-    //     m_inspectedObject->offsetPosition(m_inspectedObject->forward());
-    //     m_inspectedObject->update();
-    // }
-    // ImGui::SameLine();
-    // if (ImGui::Button("Move right"))
-    // {
-    //     m_inspectedObject->offsetPosition(m_inspectedObject->right());
-    //     m_inspectedObject->update();
-    // }
-    // ImGui::SameLine();
-    // if (ImGui::Button("Move up"))
-    // {
-    //     m_inspectedObject->offsetPosition(m_inspectedObject->up());
-    //     m_inspectedObject->update();
-    // }
-    // if (ImGui::Button("Rotate"))
-    // {
-    //     m_inspectedObject->rotateYPR( { 0.0f, 0.0f, 0.25f } );
-    //     m_inspectedObject->update();
-    // }
     
     ImGui::End();
     

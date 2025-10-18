@@ -16,6 +16,7 @@ class Transform {
     glm::vec3 m_scale;
     glm::vec3 m_position;
 
+    glm::vec3 m_rotation;
     glm::mat4 m_rotationMatrix;
 
     enum UpdateMask : uint8_t {
@@ -30,6 +31,7 @@ public:
     glm::mat4& getMatrix();
 
     glm::vec3& getPosition();
+    glm::vec3& getRotation();
     glm::vec3 const& forward();
     glm::vec3 backward();
     glm::vec3 const& right();

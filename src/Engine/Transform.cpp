@@ -17,6 +17,10 @@ glm::vec3& Transform::getPosition()
     return m_position;
 }
 
+glm::vec3 & Transform::getRotation() {
+    return m_rotation;
+}
+
 glm::vec3 const& Transform::forward()
 {
     return m_forward;
@@ -61,7 +65,7 @@ void Transform::rotateYPR(glm::vec3 const& rotation)
 {
 
     glm::vec3 RIGHT		= { 1, 0, 0 };
-    glm::vec3 UP			= { 0, 1, 0 };
+    glm::vec3 UP		= { 0, 1, 0 };
     glm::vec3 FORWARD	= { 0, 0, 1 };
 
     m_rotationMatrix = rotate(m_rotationMatrix, rotation.x, right());
@@ -89,6 +93,7 @@ void Transform::reset()
 {
     
     m_position  = glm::vec3(0.0f);
+    m_rotation  = glm::vec3(0.0f);
     m_scale     = glm::vec3(1.0f);
     
     m_right     = glm::vec3( 1.0f, 0.0f, 0.0f );

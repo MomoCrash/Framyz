@@ -2,6 +2,7 @@
 
 #include "EditorSystem.h"
 
+#include "Engine/EntityFactory.h"
 #include "Engine/GameManager.h"
 
 void EditorSystem::create() {
@@ -14,7 +15,7 @@ void EditorSystem::create() {
     m_guiIndex = m_gui->inject(m_renderSystem->Window);
     
     m_inspectorWindow = new InspectorWindow();
-    m_inspectorWindow->setInspectedObject(m_manager->getEntity(0));
+    m_inspectorWindow->setInspectedObject(EntityFactory::CreateEntity());
 
     m_sceneWindow = new SceneWindow();
     m_sceneWindow->setRenderWindow(m_renderSystem);
