@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "components/ComponentBase.h"
-#include "../../../Engine/src/Entity.h"
+#include "../Entity.h"
 
 class ComponentBase;
 class GameManager;

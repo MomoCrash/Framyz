@@ -2,36 +2,31 @@
 
 #include "PhysicSystem.h"
 
+#include "../GameManager.h"
 #include "../ECS/components/BoxCollider3D.h"
 
 void PhysicSystem::update() {
 }
 
-void PhysicSystem::preCreate() {
+void PhysicSystem::create() {
     
     BaseSystem::preCreate();
-    // Register allocation hook. In this example we'll just let Jolt use malloc / free but you can override these if you want (see Memory.h).
-	// This needs to be done before any other Jolt function is called.
+    // Register allocation hook. 
 	RegisterDefaultAllocator();
 
 	// Install trace and assert callbacks
 	Trace = TraceImpl;
 	JPH_IF_ENABLE_ASSERTS(AssertFailed = AssertFailedImpl;)
 
-	// Create a factory, this class is responsible for creating instances of classes based on their name or hash and is mainly used for deserialization of saved data.
-	// It is not directly used in this example but still required.
+	// Create a factory
 	Factory::sInstance = new Factory();
 
-	// Register all physics types with the factory and install their collision handlers with the CollisionDispatch class.
-	// If you have your own custom shape types you probably need to register their handlers with the CollisionDispatch before calling this function.
-	// If you implement your own default material (PhysicsMaterial::sDefault) make sure to initialize it before this function or else this function will create one for you.
+	// If you have your own custom shape before calling this function.
+	// If you implement your own default material (PhysicsMaterial::sDefault) before this function
 	RegisterTypes();
 
 	// We need a temp allocator for temporary allocations during the physics update. We're
 	// pre-allocating 10 MB to avoid having to do allocations during the physics update.
-	// B.t.w. 10 MB is way too much for this example but it is a typical value you can use.
-	// If you don't want to pre-allocate you can also use TempAllocatorMalloc to fall back to
-	// malloc / free.
 	TempAllocatorImpl temp_allocator(10 * 1024 * 1024);
 
 	// We need a job system that will execute physics jobs on multiple threads. Typically
@@ -40,8 +35,12 @@ void PhysicSystem::preCreate() {
 	JobSystemThreadPool job_system(cMaxPhysicsJobs, cMaxPhysicsBarriers, thread::hardware_concurrency() - 1);
 
 	// This is the max amount of rigid bodies that you can add to the physics system. If you try to add more you'll get an error.
-	// Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-	const uint cMaxBodies = 1024;
+	// For a real project use 65536.
+#ifdef FRAMYZ_EDITOR
+	const uint cMaxBodies = 8192;
+#else
+	const uint cMaxBodies = 65536;
+#endif
 
 	// This determines how many mutexes to allocate to protect rigid bodies from concurrent access. Set it to 0 for the default settings.
 	const uint cNumBodyMutexes = 0;
@@ -50,47 +49,60 @@ void PhysicSystem::preCreate() {
 	// body pairs based on their bounding boxes and will insert them into a queue for the narrowphase). If you make this buffer
 	// too small the queue will fill up and the broad phase jobs will start to do narrow phase work. This is slightly less efficient.
 	// Note: This value is low because this is a simple test. For a real project use something in the order of 65536.
-	const uint cMaxBodyPairs = 1024;
-
+#ifdef FRAMYZ_EDITOR
+    constexpr uint cMaxBodyPairs = 8192;
+#else
+	const uint cMaxBodyPairs = 65536;
+#endif
+	
 	// This is the maximum size of the contact constraint buffer. If more contacts (collisions between bodies) are detected than this
 	// number then these contacts will be ignored and bodies will start interpenetrating / fall through the world.
 	// Note: This value is low because this is a simple test. For a real project use something in the order of 10240.
-	const uint cMaxContactConstraints = 1024;
+#ifdef FRAMYZ_EDITOR
+    constexpr uint cMaxContactConstraints = 4096;
+#else
+	const uint cMaxContactConstraints = 10240;
+#endif
 
 	// Create mapping table from object layer to broadphase layer
 	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
 	// Also have a look at BroadPhaseLayerInterfaceTable or BroadPhaseLayerInterfaceMask for a simpler interface.
-	BPLayerInterfaceImpl broad_phase_layer_interface;
-
+	// HERE REPLACED BY m_broadPhaseLayer
+	
 	// Create class that filters object vs broadphase layers
 	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
 	// Also have a look at ObjectVsBroadPhaseLayerFilterTable or ObjectVsBroadPhaseLayerFilterMask for a simpler interface.
-	ObjectVsBroadPhaseLayerFilterImpl object_vs_broadphase_layer_filter;
+	// HERE REPLACED BY m_objVsBroadPhaseFilter
 
 	// Create class that filters object vs object layers
 	// Note: As this is an interface, PhysicsSystem will take a reference to this so this instance needs to stay alive!
 	// Also have a look at ObjectLayerPairFilterTable or ObjectLayerPairFilterMask for a simpler interface.
-	CollisionPairFilter object_vs_object_layer_filter;
 
 	// Now we can create the actual physics system.
-	PhysicsSystem physics_system;
-	physics_system.Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, broad_phase_layer_interface, object_vs_broadphase_layer_filter, object_vs_object_layer_filter);
+	m_physicsSystem.Init(
+		cMaxBodies, cNumBodyMutexes,
+		cMaxBodyPairs, cMaxContactConstraints,
+		
+		m_broadPhaseLayer,
+		m_objVsBroadPhaseFilter,
+		m_objVsObjFilter
+		);
 
 	// A body activation listener gets notified when bodies activate and go to sleep
 	// Note that this is called from a job so whatever you do here needs to be thread safe.
 	// Registering one is entirely optional.
 	MyBodyActivationListener body_activation_listener;
-	physics_system.SetBodyActivationListener(&body_activation_listener);
+	m_physicsSystem.SetBodyActivationListener(&body_activation_listener);
 
 	// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
 	// Note that this is called from a job so whatever you do here needs to be thread safe.
 	// Registering one is entirely optional.
 	MyContactListener contact_listener;
-	physics_system.SetContactListener(&contact_listener);
+	m_physicsSystem.SetContactListener(&contact_listener);
 
 	// The main way to interact with the bodies in the physics system is through the body interface. There is a locking and a non-locking
 	// variant of this. We're going to use the locking version (even though we're not planning to access bodies from multiple threads)
-	BodyInterface &body_interface = physics_system.GetBodyInterface();
+	BodyInterface &body_interface = m_physicsSystem.GetBodyInterface();
 
 	// Next we can create a rigid body to serve as the floor, we make a large box
 	// Create the settings for the collision volume (the shape).
@@ -121,41 +133,40 @@ void PhysicSystem::preCreate() {
 	body_interface.SetLinearVelocity(sphere_id, Vec3(0.0f, -5.0f, 0.0f));
 
 	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
-	const float cDeltaTime = 1.0f / 60.0f;
 
 	// Optional step: Before starting the physics simulation you can optimize the broad phase. This improves collision detection performance (it's pointless here because we only have 2 bodies).
 	// You should definitely not call this every frame or when e.g. streaming in a new level section as it is an expensive operation.
 	// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
-	physics_system.OptimizeBroadPhase();
+	m_physicsSystem.OptimizeBroadPhase();
+	
+}
 
-	// Now we're ready to simulate the body, keep simulating until it goes to sleep
-	uint step = 0;
-	while (body_interface.IsActive(sphere_id))
-	{
-		// Next step
-		++step;
+void PhysicSystem::fixedUpdate() {
 
-		// Output current position and velocity of the sphere
-		RVec3 position = body_interface.GetCenterOfMassPosition(sphere_id);
-		Vec3 velocity = body_interface.GetLinearVelocity(sphere_id);
-		cout << "Step " << step << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << endl;
+	// // Output current position and velocity of the sphere
+	// RVec3 position = body_interface.GetCenterOfMassPosition(sphere_id);
+	// Vec3 velocity = body_interface.GetLinearVelocity(sphere_id);
+	// cout << "Step " << step << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << endl;
+	//
+	// // If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
+	// const int cCollisionSteps = 1;
+	//
+	// // Step the world
+	// m_physicsSystem.Update(GameManager::, cCollisionSteps, &temp_allocator, &job_system);
+}
 
-		// If you take larger steps than 1 / 60th of a second you need to do multiple collision steps in order to keep the simulation stable. Do 1 collision step per 1 / 60th of a second (round up).
-		const int cCollisionSteps = 1;
+void PhysicSystem::destroy() {
+	BaseSystem::destroy();
 
-		// Step the world
-		physics_system.Update(cDeltaTime, cCollisionSteps, &temp_allocator, &job_system);
-	}
-
-	// Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
-	body_interface.RemoveBody(sphere_id);
-
-	// Destroy the sphere. After this the sphere ID is no longer valid.
-	body_interface.DestroyBody(sphere_id);
-
-	// Remove and destroy the floor
-	body_interface.RemoveBody(floor->GetID());
-	body_interface.DestroyBody(floor->GetID());
+	// // Remove the sphere from the physics system. Note that the sphere itself keeps all of its state and can be re-added at any time.
+	// body_interface.RemoveBody(sphere_id);
+	//
+	// // Destroy the sphere. After this the sphere ID is no longer valid.
+	// body_interface.DestroyBody(sphere_id);
+	//
+	// // Remove and destroy the floor
+	// body_interface.RemoveBody(floor->GetID());
+	// body_interface.DestroyBody(floor->GetID());
 
 	// Unregisters all types with the factory and cleans up the default material
 	UnregisterTypes();
@@ -165,13 +176,12 @@ void PhysicSystem::preCreate() {
 	Factory::sInstance = nullptr;
 }
 
-void PhysicSystem::create() {
-    BaseSystem::create();
-}
-
-void PhysicSystem::fixedUpdate() {
-    BaseSystem::fixedUpdate();
+PhysicSystem::PhysicSystem() : BaseSystem(1 << SystemType::PHYSICS_SYSTEM){
 }
 
 PhysicSystem::~PhysicSystem() {
+}
+
+void PhysicSystem::preCreate() {
+	BaseSystem::preCreate();
 }

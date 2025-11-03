@@ -7,20 +7,36 @@
 
 class EntityManager;
 
+namespace SystemType {
+    enum SystemType : int {
+        RENDER_SYSTEM           = 0x00001,
+        PHYSICS_SYSTEM          = 0x00002,
+
+#ifdef FRAMYZ_EDITOR
+        EDITOR_SYSTEM           = 0xFFFFF,
+#endif
+    };
+}
+
 struct BaseSystem {
+    explicit BaseSystem(int mask);
 
     virtual void preCreate();
     virtual void create();
+    
     virtual void update() = 0;
     virtual void fixedUpdate();
+    
+    virtual void destroy();
+    int getMask();
 
     bool Created = false;
 
 protected:
-    BaseSystem();
     virtual ~BaseSystem() = default;
-    
-    EntityManager* m_manager;
+
+    int m_mask;
+    EntityManager*  m_manager;
 };
 
 

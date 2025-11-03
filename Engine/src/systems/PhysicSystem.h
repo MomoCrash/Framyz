@@ -4,8 +4,23 @@
 #define PHYSICSYSTEM_H
 
 #include "BaseSystem.h"
+#include "../framework.h"
 
-#include "../jolt/define.h"
+#include <Jolt/Jolt.h>
+
+#include <Jolt/RegisterTypes.h>
+#include <Jolt/Core/Factory.h>
+#include <Jolt/Core/TempAllocator.h>
+#include <Jolt/Core/JobSystemThreadPool.h>
+#include <Jolt/Physics/PhysicsSettings.h>
+#include <Jolt/Physics/PhysicsSystem.h>
+#include <Jolt/Physics/Collision/Shape/BoxShape.h>
+#include <Jolt/Physics/Collision/Shape/SphereShape.h>
+#include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Physics/Body/BodyActivationListener.h>
+
+using namespace JPH;
+using namespace JPH::literals;
 
 // Disable common warnings triggered by Jolt, you can use JPH_SUPPRESS_WARNING_PUSH / JPH_SUPPRESS_WARNING_POP to store and restore the warning state
 // JPH_SUPPRESS_WARNINGS
@@ -128,16 +143,24 @@ public:
 
 class PhysicSystem final : BaseSystem {
 public:
+	PhysicSystem();
 	~PhysicSystem() override;
 	
-
     void preCreate() override;
     void create() override;
 	
     void update() override;
     void fixedUpdate() override;
 
+	void destroy() override;
+
 protected:
+	
+	PhysicsSystem						m_physicsSystem;
+	BPLayerInterfaceImpl				m_broadPhaseLayer;
+	ObjectVsBroadPhaseLayerFilterImpl	m_objVsBroadPhaseFilter;
+	CollisionPairFilter					m_objVsObjFilter;
+	
 };
 
 

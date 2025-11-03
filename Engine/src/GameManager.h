@@ -3,10 +3,10 @@
 #ifndef GAMEMANAGER_H
 #define GAMEMANAGER_H
 
-#include "Scene.h"
-
+#include "Clock.h"
 #include "Entity.h"
 #include "ECS/EntityManager.h"
+#include "systems/BaseSystem.h"
 
 class BaseSystem;
 struct EntityFactory;
@@ -15,25 +15,31 @@ class GameManager {
 
 public:
     GameManager();
-    ~GameManager();
+    ~GameManager() = default;
 
     static GameManager& GetInstance();
 
-    static void Run();
+    static void     Run();
+    
     template <typename System>
-    static System* AddSystem();
-    // template <typename System>
-    // static System* GetSystem();
-    static void Update();
+    static  System* AddSystem();
 
-    static void Shutdown();
+    template <typename System>
+    static  System* GetSystem(int mask);
+    
+    static  void    Shutdown();
+    
+    static  Clock   GetClock();
 
 private:
-    
-    EntityManager m_gameManager;
-    std::vector<BaseSystem*> m_systems;
+    EntityManager               m_gameManager;
+    std::vector<BaseSystem*>    m_systems;
+    Clock                       m_clock;
 
-    bool m_isRunning;
+    bool                        m_isRunning;
+    int                         m_mask;
+    
+    float                       m_accumulator;
     
     static EntityManager& GetEntityManager();
 
@@ -46,23 +52,31 @@ private:
 template<typename System>
 System* GameManager::AddSystem() {
     
+    GameManager& manager = GetInstance();
+    
     System* system = new System();
-    GetInstance().m_systems.push_back(system);
+    if (manager.m_mask & system->getMask()) {
+        delete system;
+        system = nullptr;
+        return nullptr;
+    }
+    manager.m_systems.push_back(system);
     system->preCreate();
+    manager.m_mask &= system->getMask();
     return system;
     
 }
 
-// template<typename System>
-// System * GameManager::GetSystem() {
-//
-//     for (auto m_system : GetInstance().m_systems) {
-//         if (System* returnedSystem = dynamic_cast<System*>(m_system)) {
-//             return returnedSystem;
-//         }
-//     }
-//     return nullptr;
-// }
+template<typename System>
+System* GameManager::GetSystem(int mask) {
+    GameManager& manager = GetInstance();
 
+    for (auto system : manager.m_systems) {
+        if (system->getMask() & mask) {
+            return system;
+        }
+    }
+    return nullptr;
+}
 
 #endif //GAMEMANAGER_H

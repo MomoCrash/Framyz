@@ -3,12 +3,10 @@
 #include "GameManager.h"
 
 #include "systems/BaseSystem.h"
+#include "Clock.h"
+#include "engine.hpp"
 
-GameManager::GameManager(): m_gameManager() {
-}
-
-GameManager::~GameManager() {
-    
+GameManager::GameManager() : m_isRunning(false), m_mask(0), m_accumulator(0) {
 }
 
 GameManager & GameManager::GetInstance() {
@@ -28,19 +26,40 @@ void GameManager::Run() {
             if (!system->Created) system->create();
             system->update();
         }
+
+        manager.m_accumulator += manager.m_clock.GetDeltaTime();
+        float deltaTime = manager.m_clock.GetUnscaledDeltaTime();
+        int steps = 0;
+        while(manager.m_accumulator >= deltaTime && steps < MAX_PHYSICS_STEPS)
+        {
+            
+            for (auto* system : manager.m_systems) {
+                system->fixedUpdate();
+            }
+            
+            manager.m_accumulator -= deltaTime;
+            steps++;
+        }
+        if (steps == MAX_PHYSICS_STEPS)
+        {
+            manager.m_accumulator = 0.0;
+        }
         
     }
     
 }
 
-void GameManager::Update() {
+void GameManager::Shutdown() {
+    GameManager& manager = GetInstance();
     
-    GetInstance().m_gameManager.update();
-    
+    manager.m_isRunning = false;
+    for (auto* system : manager.m_systems) {
+        if (system->Created) system->create();
+    }
 }
 
-void GameManager::Shutdown() {
-    GetInstance().m_isRunning = false;
+Clock GameManager::GetClock() {
+    return GetInstance().m_clock;
 }
 
 EntityManager & GameManager::GetEntityManager() {

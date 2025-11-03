@@ -4,6 +4,10 @@
 
 #include "../GameManager.h"
 
+BaseSystem::BaseSystem(int mask) : m_mask(mask) {
+    m_manager = &GameManager::GetInstance().GetEntityManager();
+}
+
 void BaseSystem::preCreate() {}
 
 void BaseSystem::create() {
@@ -13,6 +17,9 @@ void BaseSystem::create() {
 void BaseSystem::fixedUpdate() {
 }
 
-BaseSystem::BaseSystem() {
-    m_manager = &GameManager::GetEntityManager();
+void BaseSystem::destroy() {
+}
+
+int BaseSystem::getMask() {
+    return m_mask;
 }

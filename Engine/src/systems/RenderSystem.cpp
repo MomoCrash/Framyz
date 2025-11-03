@@ -5,8 +5,10 @@
 #include "../GameManager.h"
 #include "../ECS/ecs.h"
 
-RenderSystem::RenderSystem() {
-    
+RenderSystem::RenderSystem() : BaseSystem(1 << SystemType::RENDER_SYSTEM), Window(nullptr), DefaultPipeline(nullptr),
+                               DefaultTexture(nullptr),
+                               DefaultSampler(nullptr),
+                               OutTexture(nullptr) {
 }
 
 RenderSystem::~RenderSystem() {

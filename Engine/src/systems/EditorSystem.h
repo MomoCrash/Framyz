@@ -8,7 +8,9 @@
 #include "../interfaces/interfaces.h"
 
 struct EditorSystem final : BaseSystem {
-    
+    explicit EditorSystem()
+        : BaseSystem(1 << SystemType::EDITOR_SYSTEM), m_guiIndex(0){}
+
     void create() override;
     void update() override;
 

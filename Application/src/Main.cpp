@@ -1,15 +1,10 @@
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 #include "engine.hpp"
-
+#include "asset/AssetLoader.h"
 
 int main() {
-
-    //test_app();
-
     RenderSystem* render = GameManager::AddSystem<RenderSystem>();
     AssetLoader::loadRenderAsset(render);
 
@@ -19,7 +14,5 @@ int main() {
 #endif
 
     GameManager::Run();
-    
     return 0;
-    
 }
