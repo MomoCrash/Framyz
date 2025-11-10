@@ -20,7 +20,8 @@ set(IMNODEFLOW_DIR ${PROJECT_SOURCE_DIR}/External/im_nodeflow)
 # SET SOURCES FILES FOR PROJECT COMPILABLE LIBS
 file(GLOB_RECURSE BUILTIN_EXTERNALS ${PROJECT_SOURCE_DIR}/External/*.cpp
         ${PROJECT_SOURCE_DIR}/External/*.h
-        ${PROJECT_SOURCE_DIR}/External/*.inl)
+        ${PROJECT_SOURCE_DIR}/External/*.inl
+        im_gui/stb_image.h)
 
 ###### The configurations we support
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release;Distribution")
@@ -93,7 +94,8 @@ target_link_directories(Dependencies PUBLIC ${Vulkan_LIBRARIES})
 
 target_include_directories(Dependencies PUBLIC 
         ${PROJECT_SOURCE_DIR}/External/im_nodeflow/include 
-        ${PROJECT_SOURCE_DIR}/External/im_gui)
+        ${PROJECT_SOURCE_DIR}/External/im_gui 
+        ${PROJECT_SOURCE_DIR}/External/)
 target_include_directories(Dependencies PUBLIC
         ${Vulkan_LIBRARIES}
         ${Vulkan_INCLUDE_DIRS}

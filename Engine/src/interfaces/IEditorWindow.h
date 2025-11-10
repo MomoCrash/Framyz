@@ -3,7 +3,7 @@
 #ifndef IEDITORWINDOW_H
 #define IEDITORWINDOW_H
 
-
+#include "../framework.h"
 
 class IEditorWindow {
 

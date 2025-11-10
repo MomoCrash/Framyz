@@ -465,16 +465,16 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int keycode, int scancode, i
 
 void ImGui_ImplGlfw_WindowFocusCallback(GLFWwindow* window, int focused)
 {
-    ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
-    if (bd->PrevUserCallbackWindowFocus != nullptr && ImGui_ImplGlfw_ShouldChainCallback(window))
-        bd->PrevUserCallbackWindowFocus(window, focused);
-
-    // Workaround for Linux: when losing focus with MouseIgnoreButtonUpWaitForFocusLoss set, we will temporarily ignore subsequent Mouse Up events
-    bd->MouseIgnoreButtonUp = (bd->MouseIgnoreButtonUpWaitForFocusLoss && focused == 0);
-    bd->MouseIgnoreButtonUpWaitForFocusLoss = false;
-
-    ImGuiIO& io = ImGui::GetIO();
-    io.AddFocusEvent(focused != 0);
+    // ImGui_ImplGlfw_Data* bd = ImGui_ImplGlfw_GetBackendData();
+    // if (bd->PrevUserCallbackWindowFocus != nullptr && ImGui_ImplGlfw_ShouldChainCallback(window))
+    //     bd->PrevUserCallbackWindowFocus(window, focused);
+    //
+    // // Workaround for Linux: when losing focus with MouseIgnoreButtonUpWaitForFocusLoss set, we will temporarily ignore subsequent Mouse Up events
+    // bd->MouseIgnoreButtonUp = (bd->MouseIgnoreButtonUpWaitForFocusLoss && focused == 0);
+    // bd->MouseIgnoreButtonUpWaitForFocusLoss = false;
+    //
+    // ImGuiIO& io = ImGui::GetIO();
+    // io.AddFocusEvent(focused != 0);
 }
 
 void ImGui_ImplGlfw_CursorPosCallback(GLFWwindow* window, double x, double y)

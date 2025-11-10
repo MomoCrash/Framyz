@@ -4,6 +4,7 @@
 
 #include "components/ComponentBase.h"
 #include "../Entity.h"
+#include "../GameManager.h"
 
 EntityManager::EntityManager(): m_entityCount(0), m_entityToAddCount(0), m_entityToRemoveCount(0) {}
 
@@ -84,8 +85,30 @@ std::vector<ComponentBase *> const & EntityManager::getComponents(Entity* index)
     return m_entities[*index->getId()]->AttachedComponents;
 }
 
+ComponentBase * EntityManager::getComponent(Entity *entity, uint32_t componentId) {
+    if (entity->isCreated()) {
+        EntityComponentPair* pair = m_entities[*entity->getId()];
+        for (int i = 0; i < pair->AttachedComponents.size(); i++) {
+            ComponentBase* comp = pair->AttachedComponents.at(i);
+            if (comp->Mask & componentId ) {
+                return comp;
+            }
+        }
+        return nullptr;
+    }
+    
+    EntityComponentPair* pair = m_entitiesToAdd[*entity->getId()];
+    for (ComponentBase* comp : pair->AttachedComponents) {
+        if (comp->Mask & componentId ) {
+            return comp;
+        }
+    }
+    return nullptr;
+}
+
 void EntityManager::attachComponent(ComponentBase *base, Entity *entity) {
-    if (entity->hasComponent(base->Mask)) return;
+    uint32_t componentId = 1 << base->Mask;
+    if (entity->hasComponent(componentId)) return;
 
     base->Owner = entity;
     EntityComponentPair* pair;
@@ -95,13 +118,18 @@ void EntityManager::attachComponent(ComponentBase *base, Entity *entity) {
     else
         pair = m_entitiesToAdd[*entity->getId()];
 
-    entity->attachComponent(base->Mask);
+    entity->attachComponent(componentId);
     pair->AttachedComponents.push_back(base);
     base->instantiate();
+
+    for (auto system : GameManager::GetInstance().GetSystems()) {
+        system->onComponentRegister(base);
+    }
 }
 
 void EntityManager::removeComponent(ComponentBase *base, Entity *entity) {
-    if (!entity->hasComponent(base->Mask)) return;
+    uint32_t componentId = 1 << base->Mask;
+    if (!entity->hasComponent(componentId)) return;
     
     EntityComponentPair* pair;
     
@@ -110,7 +138,11 @@ void EntityManager::removeComponent(ComponentBase *base, Entity *entity) {
     else
         pair = m_entitiesToAdd[*entity->getId()];
     
-    entity->removeComponent(base->Mask);
+    entity->removeComponent(componentId);
+    
+    for (auto system : GameManager::GetInstance().GetSystems()) {
+        system->onComponentUnregister(base);
+    }
     for (int i = 0; i < pair->AttachedComponents.size(); i++) {
         if (pair->AttachedComponents[i]->Mask & base->Mask) {
             base->deactivate();

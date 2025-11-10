@@ -32,9 +32,12 @@ public:
     [[nodiscard]] std::vector<ComponentBase*> const& getComponents(Entity* entity) ;
     template<typename C>
     C* getComponent(Entity* entity) ;
+    ComponentBase* getComponent(Entity* entity, uint32_t componentId) ;
+    
     template<typename C>
     C* attachComponent(Entity* entity) ;
     void attachComponent(ComponentBase* base, Entity* entity) ;
+    
     void removeComponent(ComponentBase* base, Entity* entity) ;
 
     int getEntityCount() const;
@@ -44,10 +47,10 @@ private:
     int m_entityToAddCount;
     int m_entityToRemoveCount;
     
-    EntityComponentPair** m_entities        = new EntityComponentPair *[2048] {nullptr};
+    EntityComponentPair** m_entities        = new EntityComponentPair *[2048] {nullptr}; // TODO : DYNAMIC MEMORY : REMINDER DYNAMIC INDEX FOR FIND NEW LOCATION IN MEMORY
     EntityComponentPair** m_entitiesToAdd   = new EntityComponentPair *[2048] {nullptr};
     
-    int** m_toRemoveEntityIndex = new int*[2048] {nullptr};
+    int** m_toRemoveEntityIndex             = new int*[2048] {nullptr};
 
     friend GameManager;
     friend Entity;
@@ -57,25 +60,11 @@ private:
 template<typename C>
 C* EntityManager::getComponent(Entity* entity) {
 
-    if (entity->isCreated()) {
-        EntityComponentPair* pair = m_entities[*entity->getId()];
-        for (int i = 0; i < pair->AttachedComponents.size(); i++) {
-            ComponentBase* comp = pair->AttachedComponents.at(i);
-            if (comp->Mask & C::ComponentMask ) {
-                return dynamic_cast<C*>(comp);
-            }
-        }
-        return nullptr;
-    }
-    
-    EntityComponentPair* pair = m_entitiesToAdd[*entity->getId()];
-    for (ComponentBase* comp : pair->AttachedComponents) {
-        if (comp->Mask & static_cast<uint64_t>(C::TypeID) ) {
-            return dynamic_cast<C*>(comp);
-        }
+    ComponentBase* comp = EntityManager::getComponent(entity, C::ComponentMask);
+    if (comp != nullptr) {
+        return dynamic_cast<C*>(comp);
     }
     return nullptr;
-    
 }
 
 template<typename C>

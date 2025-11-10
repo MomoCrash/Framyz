@@ -4,6 +4,7 @@
 
 #include "../EntityFactory.h"
 #include "../GameManager.h"
+#include "../interfaces/editor/HierarchyWindow.h"
 
 void EditorSystem::create() {
 
@@ -15,8 +16,9 @@ void EditorSystem::create() {
     m_guiIndex = m_gui->inject(m_renderSystem->Window);
     
     m_inspectorWindow = new InspectorWindow();
-    m_inspectorWindow->setInspectedObject(EntityFactory::CreateEntity());
-
+    
+    m_hierarchyWindow = new HierarchyWindow(this);
+    
     m_sceneWindow = new SceneWindow();
     m_sceneWindow->setRenderWindow(m_renderSystem);
 #ifdef FRAMYZ_EDITOR
@@ -29,7 +31,9 @@ void EditorSystem::create() {
 }
 
 void EditorSystem::update() {
-
+    
+    if (m_renderSystem->Window->shouldClose()) return;
+    
     m_renderSystem->Window->beginDraw();
 
     m_gui->setContext(m_guiIndex);
@@ -82,9 +86,8 @@ void EditorSystem::update() {
             ImGui::EndMenu();
         }
 
-        if (ImGui::BeginMenu("Window"))
+        if (ImGui::BeginMenu("Windows"))
         {
-            
             if (ImGui::MenuItem("Nodyz Editor")) {
                 m_nodeEditor->open();
             }
@@ -100,6 +103,7 @@ void EditorSystem::update() {
     ImGui::End();
 
     m_inspectorWindow->draw();
+    m_hierarchyWindow->draw();
     m_sceneWindow->draw();
 
     ImGui::Render();
@@ -117,4 +121,8 @@ void EditorSystem::update() {
 
 void EditorSystem::AddRender(RenderSystem *system) {
     m_renderSystem = system;
+}
+
+InspectorWindow * EditorSystem::getInspector() {
+    return m_inspectorWindow;
 }

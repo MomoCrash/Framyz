@@ -24,8 +24,4 @@
 #include <cstdarg>
 #include <thread>
 
-using namespace JPH;
-using namespace JPH::literals;
-using namespace std;
-
 #endif //FRAMEWORK_ENGINE_H

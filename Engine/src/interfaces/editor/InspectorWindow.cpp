@@ -20,9 +20,17 @@ void InspectorWindow::updateParameters()
 {
     m_options.clear();
     for (int i = 0; i < static_cast<int>(ComponentType::Size); i++) {
-        if (!m_inspectedObject->hasComponent(i))
+        if (!m_inspectedObject->hasComponent(1 << i))
             m_options.push_back(to_string(static_cast<ComponentType>(i)));
     }
+
+    m_position[0] = &m_inspectedObject->getPosition().x;
+    m_position[1] = &m_inspectedObject->getPosition().y;
+    m_position[2] = &m_inspectedObject->getPosition().z;
+    
+    m_rotation[0] = &m_inspectedObject->getRotation().x;
+    m_rotation[1] = &m_inspectedObject->getRotation().y;
+    m_rotation[2] = &m_inspectedObject->getRotation().z;
 }
 
 void InspectorWindow::draw()
@@ -43,6 +51,7 @@ void InspectorWindow::draw()
     float w = ImGui::CalcItemWidth();
     float spacing = style.ItemInnerSpacing.x;
     float button_sz = ImGui::GetFrameHeight();
+    
     ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
     if (ImGui::BeginCombo("##custom combo", current_item, ImGuiComboFlags_NoArrowButton))
     {
@@ -66,16 +75,15 @@ void InspectorWindow::draw()
 
             EntityFactory::AttachComponent(static_cast<ComponentType>(currentIndex), m_inspectedObject);
             hasSelected = false;
+            current_item = "Create new Component";
             updateParameters();
         }
     }
 
     ImGui::SeparatorText("Transform");
-    static float* position[3] = { &m_inspectedObject->getPosition().x, &m_inspectedObject->getPosition().y, &m_inspectedObject->getPosition().z};
-    ImGui::DragFloat3("Position", *position, 0.1);
-    static float* rotation[3] = { &m_inspectedObject->getRotation().x, &m_inspectedObject->getRotation().y, &m_inspectedObject->getRotation().z};
+    ImGui::DragFloat3("Position", *m_position, 0.1);
     glm::vec3 oldRotation = glm::vec3(m_inspectedObject->getRotation());
-    if (ImGui::DragFloat3("Rotation", *rotation, 0.1)) {
+    if (ImGui::DragFloat3("Rotation", *m_rotation, 0.1)) {
         glm::vec3 newRotation = oldRotation - m_inspectedObject->getRotation();
         m_inspectedObject->rotateYPR(newRotation);
     }

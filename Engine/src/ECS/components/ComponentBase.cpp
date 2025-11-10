@@ -24,9 +24,10 @@ bool ComponentBase::isActive() const {
     return m_active;
 }
 
-void ComponentBase::EDITOR_Display() {
-    
-}
+void ComponentBase::EDITOR_Display() {}
 
-void ComponentBase::instantiate() {
+void ComponentBase::instantiate() {}
+
+bool ComponentBase::is(uint64_t other) {
+    return Mask & other;
 }

@@ -5,7 +5,7 @@
 #include "../GameManager.h"
 #include "../ECS/ecs.h"
 
-RenderSystem::RenderSystem() : BaseSystem(1 << SystemType::RENDER_SYSTEM), Window(nullptr), DefaultPipeline(nullptr),
+RenderSystem::RenderSystem() : Window(nullptr), DefaultPipeline(nullptr),
                                DefaultTexture(nullptr),
                                DefaultSampler(nullptr),
                                OutTexture(nullptr) {
@@ -49,7 +49,10 @@ void RenderSystem::create() {
 
 void RenderSystem::update() {
 
-    if (Window->shouldClose()) GameManager::Shutdown();
+    if (Window->shouldClose()) {
+        GameManager::Shutdown();
+        return;
+    }
 
     glfwPollEvents();
 

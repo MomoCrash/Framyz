@@ -8,11 +8,12 @@
 
 class Entity;
 
-#define COMPONENT_ENUM_SET  \
-    VALUE(MeshRenderer)     \
-    VALUE(Camera)           \
-    VALUE(Rigidbody3D)      \
-    VALUE(BoxCollider3D)    \
+#define COMPONENT_ENUM_SET   \
+    VALUE(MeshRenderer)      \
+    VALUE(Camera)            \
+    VALUE(Rigidbody3D)       \
+    VALUE(BoxCollider3D)     \
+    VALUE(SphereCollider3D)  \
 
 enum class ComponentType : uint64_t {
     #define VALUE(name) name,
@@ -47,6 +48,8 @@ public:
     virtual void EDITOR_Display();
     virtual void instantiate();
 
+    bool is(uint64_t other);
+
     uint64_t Mask;
 
 protected:
@@ -65,7 +68,7 @@ struct Component : ComponentBase
         Mask = 1 << static_cast<uint64_t>(typeID);
     }
     
-    static constexpr ComponentType TypeID = typeID;
+    static constexpr ComponentType TypeID   = typeID;
     static constexpr uint64_t ComponentMask = 1 << static_cast<uint64_t>(typeID);
 };
 

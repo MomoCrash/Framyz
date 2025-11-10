@@ -6,7 +6,7 @@
 #include "BaseSystem.h"
 #include "../interfaces/interfaces.h"
 
-struct RenderSystem final : BaseSystem {
+DECLARE_SYSTEM(RenderSystem, BaseSystem, SystemType::RENDER_SYSTEM)
 
     RenderSystem();
     ~RenderSystem() override;

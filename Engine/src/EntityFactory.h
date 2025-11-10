@@ -5,8 +5,13 @@
 
 #include "GameManager.h"
 #include "ECS/EntityManager.h"
+#include "ECS/components/physics/BoxCollider3D.h"
 #include "ECS/components/MeshRenderer.h"
 #include "ECS/components/Camera.h"
+#include "ECS/components/physics/Rigidbody3D.h"
+#include "ECS/components/physics/Collider3D.h"
+#include "ECS/components/physics/BoxCollider3D.h"
+#include "ECS/components/physics/SphereCollider3D.h"
 
 struct EntityFactory {
 private:
@@ -24,12 +29,9 @@ private:
     }
 
     const std::function<ComponentBase* ()>* ComponentBuilder = new std::function<ComponentBase * ()>[static_cast<int>(ComponentType::Size)] {
-        // #define VALUE(name) EntityFactory::CreateComponent<name>,
-        // COMPONENT_ENUM_SET
-        // #undef VALUE
-
-        EntityFactory::CreateComponent<MeshRenderer>,
-        EntityFactory::CreateComponent<Camera>,
+        #define VALUE(name) EntityFactory::CreateComponent<name>,
+        COMPONENT_ENUM_SET
+        #undef VALUE
         
     };
 

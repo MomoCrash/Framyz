@@ -141,7 +141,55 @@ public:
 	}
 };
 
-class PhysicSystem final : BaseSystem {
+using namespace JPH;
+using namespace JPH::literals;
+using namespace std;
+
+// An example contact listener
+class MyContactListener : public ContactListener
+{
+public:
+	// See: ContactListener
+	virtual ValidateResult	OnContactValidate(const Body &inBody1, const Body &inBody2, RVec3Arg inBaseOffset, const CollideShapeResult &inCollisionResult) override
+	{
+		cout << "Contact validate callback" << endl;
+
+		// Allows you to ignore a contact before it is created (using layers to not make objects collide is cheaper!)
+		return ValidateResult::AcceptAllContactsForThisBodyPair;
+	}
+
+	virtual void			OnContactAdded(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
+	{
+		cout << "A contact was added" << endl;
+	}
+
+	virtual void			OnContactPersisted(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
+	{
+		cout << "A contact was persisted" << endl;
+	}
+
+	virtual void			OnContactRemoved(const SubShapeIDPair &inSubShapePair) override
+	{
+		cout << "A contact was removed" << endl;
+	}
+};
+
+// An example activation listener
+class MyBodyActivationListener : public BodyActivationListener
+{
+public:
+	virtual void		OnBodyActivated(const BodyID &inBodyID, uint64 inBodyUserData) override
+	{
+		cout << "A body got activated" << endl;
+	}
+
+	virtual void		OnBodyDeactivated(const BodyID &inBodyID, uint64 inBodyUserData) override
+	{
+		cout << "A body went to sleep" << endl;
+	}
+};
+
+DECLARE_SYSTEM(PhysicSystem, BaseSystem, SystemType::PHYSICS_SYSTEM)
 public:
 	PhysicSystem();
 	~PhysicSystem() override;
@@ -152,14 +200,25 @@ public:
     void update() override;
     void fixedUpdate() override;
 
+    void onComponentRegister(ComponentBase *component) override;
+    void onComponentUnregister(ComponentBase *component) override;
+
 	void destroy() override;
 
 protected:
+
+	static constexpr int m_collisionStep = 1;
 	
-	PhysicsSystem						m_physicsSystem;
-	BPLayerInterfaceImpl				m_broadPhaseLayer;
-	ObjectVsBroadPhaseLayerFilterImpl	m_objVsBroadPhaseFilter;
-	CollisionPairFilter					m_objVsObjFilter;
+	PhysicsSystem						*m_physicsSystem;
+	BPLayerInterfaceImpl				*m_broadPhaseLayer;
+	ObjectVsBroadPhaseLayerFilterImpl	*m_objVsBroadPhaseFilter;
+	CollisionPairFilter					*m_objVsObjFilter;
+
+	MyBodyActivationListener    		*m_activationListener;
+	MyContactListener           		*m_contactListener;
+
+	TempAllocatorImpl					*m_tempAllocator;
+	JobSystemThreadPool					*m_jobSystem;
 	
 };
 

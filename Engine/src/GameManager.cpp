@@ -17,12 +17,11 @@ GameManager & GameManager::GetInstance() {
 void GameManager::Run() {
     GameManager& manager = GetInstance();
     manager.m_isRunning = true;
-    
-    while (manager.m_isRunning) {
 
+    while (manager.m_isRunning) {
         manager.m_gameManager.update();
-        
-        for (auto* system : manager.m_systems) {
+
+        for (auto *system: manager.m_systems) {
             if (!system->Created) system->create();
             system->update();
         }
@@ -30,32 +29,33 @@ void GameManager::Run() {
         manager.m_accumulator += manager.m_clock.GetDeltaTime();
         float deltaTime = manager.m_clock.GetUnscaledDeltaTime();
         int steps = 0;
-        while(manager.m_accumulator >= deltaTime && steps < MAX_PHYSICS_STEPS)
-        {
-            
-            for (auto* system : manager.m_systems) {
+        while (manager.m_accumulator >= deltaTime && steps < MAX_PHYSICS_STEPS) {
+            for (auto *system: manager.m_systems) {
                 system->fixedUpdate();
             }
-            
+        
             manager.m_accumulator -= deltaTime;
             steps++;
         }
-        if (steps == MAX_PHYSICS_STEPS)
-        {
+        if (steps == MAX_PHYSICS_STEPS) {
             manager.m_accumulator = 0.0;
         }
-        
+    }
+
+    for (auto* system : manager.m_systems) {
+        if (system->Created) system->destroy();
     }
     
+}
+
+std::vector<BaseSystem *> const & GameManager::GetSystems() {
+    return GetInstance().m_systems;
 }
 
 void GameManager::Shutdown() {
     GameManager& manager = GetInstance();
     
     manager.m_isRunning = false;
-    for (auto* system : manager.m_systems) {
-        if (system->Created) system->create();
-    }
 }
 
 Clock GameManager::GetClock() {

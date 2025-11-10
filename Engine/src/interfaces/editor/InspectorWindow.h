@@ -25,4 +25,15 @@ public:
 private:
     Entity* m_inspectedObject;
     std::vector<std::string> m_options;
+
+    static inline float* m_position[3] = {
+        0,
+        0,
+        0
+    };
+    static inline float* m_rotation[3] = {
+        0,
+        0,
+        0
+    };
 };

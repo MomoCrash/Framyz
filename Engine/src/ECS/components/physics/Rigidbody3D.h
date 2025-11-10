@@ -3,12 +3,17 @@
 #ifndef RIGIDBODY3D_H
 #define RIGIDBODY3D_H
 
-#include "ComponentBase.h"
+#include "../ComponentBase.h"
 
 DECLARE_COMPONENT( Rigidbody3D, Component ) {
+	
     Rigidbody3D();
 
-    
+	void EDITOR_Display()   override;
+	void instantiate()      override;
+
+    JPH::BodyID 			BodyID;
+	
 };
 
 

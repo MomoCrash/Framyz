@@ -8,7 +8,7 @@
 #include "ECS/EntityManager.h"
 #include "systems/BaseSystem.h"
 
-class BaseSystem;
+class HierarchyWindow;
 struct EntityFactory;
 
 class GameManager {
@@ -25,7 +25,9 @@ public:
     static  System* AddSystem();
 
     template <typename System>
-    static  System* GetSystem(int mask);
+    static  System* GetSystem();
+    
+    static  std::vector<BaseSystem*> const& GetSystems();
     
     static  void    Shutdown();
     
@@ -43,6 +45,10 @@ private:
     
     static EntityManager& GetEntityManager();
 
+#ifdef FRAMYZ_EDITOR
+    friend HierarchyWindow;
+#endif
+    
     friend EntityFactory;
     friend Entity;
     friend BaseSystem;
@@ -55,25 +61,26 @@ System* GameManager::AddSystem() {
     GameManager& manager = GetInstance();
     
     System* system = new System();
-    if (manager.m_mask & system->getMask()) {
+    int mask = system->getMask();
+    if (manager.m_mask & mask) {
         delete system;
         system = nullptr;
         return nullptr;
     }
     manager.m_systems.push_back(system);
     system->preCreate();
-    manager.m_mask &= system->getMask();
+    manager.m_mask |= system->getMask();
     return system;
     
 }
 
 template<typename System>
-System* GameManager::GetSystem(int mask) {
+System* GameManager::GetSystem() {
     GameManager& manager = GetInstance();
 
     for (auto system : manager.m_systems) {
-        if (system->getMask() & mask) {
-            return system;
+        if (system->getMask() & System::Mask) {
+            return dynamic_cast<System *>(system);
         }
     }
     return nullptr;

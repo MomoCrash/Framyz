@@ -4,7 +4,8 @@
 
 #include "../GameManager.h"
 
-BaseSystem::BaseSystem(int mask) : m_mask(mask) {
+
+BaseSystem::BaseSystem() {
     m_manager = &GameManager::GetInstance().GetEntityManager();
 }
 
@@ -14,12 +15,10 @@ void BaseSystem::create() {
     Created = true;
 }
 
-void BaseSystem::fixedUpdate() {
-}
+void BaseSystem::fixedUpdate() {}
 
-void BaseSystem::destroy() {
-}
+void BaseSystem::destroy() {}
 
-int BaseSystem::getMask() {
-    return m_mask;
-}
+void BaseSystem::onComponentRegister(ComponentBase *component) {}
+
+void BaseSystem::onComponentUnregister(ComponentBase *component) {}

@@ -13,7 +13,7 @@ Entity::Entity(Entity *parent)
 Entity::~Entity() {}
 
 ComponentBase * Entity::getComponent(uint32_t componentId) {
-    //return GameManager::GetEntityManager().getComponent(this);
+    return GameManager::GetEntityManager().getComponent(this, componentId);
     return nullptr;
 }
 

@@ -5,21 +5,22 @@
 
 #include "../framework.h"
 
+class ComponentBase;
 class EntityManager;
 
 namespace SystemType {
-    enum SystemType : int {
+    enum Type : int {
         RENDER_SYSTEM           = 0x00001,
         PHYSICS_SYSTEM          = 0x00002,
 
 #ifdef FRAMYZ_EDITOR
-        EDITOR_SYSTEM           = 0xFFFFF,
+        EDITOR_SYSTEM           = 0x00010,
 #endif
     };
 }
 
 struct BaseSystem {
-    explicit BaseSystem(int mask);
+    explicit BaseSystem();
 
     virtual void preCreate();
     virtual void create();
@@ -28,17 +29,26 @@ struct BaseSystem {
     virtual void fixedUpdate();
     
     virtual void destroy();
-    int getMask();
 
-    bool Created = false;
+    virtual void onComponentRegister(ComponentBase* component);
+    virtual void onComponentUnregister(ComponentBase* component);
+
+    virtual int getMask() = 0;
+    bool        Created = false;
 
 protected:
     virtual ~BaseSystem() = default;
 
-    int m_mask;
     EntityManager*  m_manager;
 };
 
+#define DECLARE_SYSTEM( name, parent, type ) \
+struct name : parent {  \
+    static constexpr int Mask = type;\
+    int getMask() override { \
+        return name::Mask;\
+    }\
+    
 
 
 #endif //SYSTEMBASE_H
