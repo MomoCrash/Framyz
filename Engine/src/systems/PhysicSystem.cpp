@@ -126,7 +126,9 @@ void PhysicSystem::fixedUpdate() {
         
 		Entity* entity = m_manager->getEntity(i);
 		if (entity->hasComponent(Rigidbody3D::ComponentMask)) {
+		
 			Rigidbody3D* body = reinterpret_cast<Rigidbody3D *>(entity->getComponent(Rigidbody3D::ComponentMask));
+			if (!body->IsValid) continue;
 
 			RVec3 position = body_interface.GetCenterOfMassPosition(body->BodyID);
 			Vec3 velocity = body_interface.GetLinearVelocity(body->BodyID);
@@ -168,6 +170,7 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		if (component->GetOwner()->hasComponent(Rigidbody3D::ComponentMask)) {
 			Rigidbody3D* body = dynamic_cast<Rigidbody3D *>(component->GetOwner()->getComponent(Rigidbody3D::ComponentMask));
 			body->BodyID = collider->BodySettings->GetID();
+			body->IsValid = true;
 		}
 	}
 
@@ -191,6 +194,7 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		if (component->GetOwner()->hasComponent(Rigidbody3D::ComponentMask)) {
 			Rigidbody3D* body = dynamic_cast<Rigidbody3D *>(component->GetOwner()->getComponent(Rigidbody3D::ComponentMask));
 			body->BodyID = collider->BodySettings->GetID();
+			body->IsValid = true;
 		}
 	}
 }

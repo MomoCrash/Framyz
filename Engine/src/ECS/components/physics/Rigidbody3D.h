@@ -12,6 +12,7 @@ DECLARE_COMPONENT( Rigidbody3D, Component ) {
 	void EDITOR_Display()   override;
 	void instantiate()      override;
 
+    bool 					IsValid;
     JPH::BodyID 			BodyID;
 	
 };
