@@ -54,8 +54,6 @@ void RenderSystem::update() {
         return;
     }
 
-    glfwPollEvents();
-
     Window->beginFrame();
 
 #ifdef FRAMYZ_EDITOR

@@ -10,6 +10,12 @@ public:
 
 	GLFWwindow* GetWindow();
 
+	static void SetKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode);
+	static void SetCharCallback(GLFWwindow* window, unsigned int c);
+	static void SetMouseButtonCallback(GLFWwindow *window, int button, int action, int mode);
+	static void SetScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+	static void SetFocusCallback(GLFWwindow* window, int focused);
+
 
 protected:
 

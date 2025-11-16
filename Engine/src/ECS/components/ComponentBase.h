@@ -82,6 +82,4 @@ struct Component : ComponentBase
         EntityFactory::RemoveComponent(this); \
     }\
 
-#define 
-
 #endif //COMPONENT_H

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 
+#include "Inputs.h"
 #include "RenderDevice.h"
 #include "Mesh.h"
 #include "RenderObject.h"
@@ -462,6 +463,10 @@ void RenderWindow::display()
     }
     
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
+    Input::Update(m_window);
+    glfwPollEvents();
+    
 }
 
 void RenderWindow::endDraw()

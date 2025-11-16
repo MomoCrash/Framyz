@@ -1,34 +1,6 @@
 #include "Window.h"
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-}
-
-void char_callback(GLFWwindow* window, unsigned int c) {
-    ImGui_ImplGlfw_CharCallback(window, c);
-}
-
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-}
-
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
-    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
-}
-
-void window_focus_callback(GLFWwindow* window, int focused)
-{
-    glfwWindowHint(GLFW_FOCUSED, GLFW_FALSE);
-    if (focused)
-    {
-        std::cout << "Focused" << std::endl;
-        glfwSetKeyCallback(window, key_callback);
-        glfwSetCharCallback(window, char_callback);
-        glfwSetMouseButtonCallback(window, mouse_button_callback);
-        glfwSetScrollCallback(window, scroll_callback);
-    }
-    ImGui_ImplGlfw_WindowFocusCallback(window, focused);
-}
+#include "Inputs.h"
 
 Window::Window(const char* title, const int width, const int height)
     : m_title(title), m_width(width), m_height(height)
@@ -39,12 +11,11 @@ Window::Window(const char* title, const int width, const int height)
 
     m_window = glfwCreateWindow(m_width, m_height, m_title, nullptr, nullptr);
 
-    glfwSetWindowFocusCallback(m_window, window_focus_callback);
-
-    glfwSetKeyCallback(m_window, key_callback);
-    glfwSetCharCallback(m_window, char_callback);
-    glfwSetMouseButtonCallback(m_window, mouse_button_callback);
-    glfwSetScrollCallback(m_window, scroll_callback);
+    glfwSetWindowFocusCallback(m_window, SetFocusCallback);
+    glfwSetKeyCallback(m_window, SetKeyCallback);
+    glfwSetCharCallback(m_window, SetCharCallback);
+    glfwSetMouseButtonCallback(m_window, SetMouseButtonCallback);
+    glfwSetScrollCallback(m_window, SetScrollCallback);
     
 }
 
@@ -57,4 +28,38 @@ Window::~Window()
 GLFWwindow* Window::GetWindow()
 {
     return m_window;
+}
+
+void Window::SetKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode) {
+    if (action == GLFW_REPEAT)
+        return;
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mode);
+    Input::UpdateKey(static_cast<Input::KeyCode>(key), action == GLFW_PRESS ? Input::JUST_PRESSED : Input::JUST_RELEASED);
+}
+
+void Window::SetCharCallback(GLFWwindow *window, unsigned int c) {
+    ImGui_ImplGlfw_CharCallback(window, c);
+    
+}
+
+void Window::SetMouseButtonCallback(GLFWwindow *window, int button, int action, int mode) {
+    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mode);
+    Input::UpdateMouse(static_cast<Input::KeyMouseCode>(button), action == GLFW_PRESS ? Input::JUST_PRESSED : Input::JUST_RELEASED);
+}
+
+void Window::SetScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
+    ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+}
+
+void Window::SetFocusCallback(GLFWwindow *window, int focused) {
+    glfwWindowHint(GLFW_FOCUSED, focused);
+    if (focused)
+    {
+        std::cout << "Focused" << std::endl;
+        glfwSetKeyCallback(window, SetKeyCallback);
+        glfwSetCharCallback(window, SetCharCallback);
+        glfwSetMouseButtonCallback(window, SetMouseButtonCallback);
+        glfwSetScrollCallback(window, SetScrollCallback);
+    }
+    ImGui_ImplGlfw_WindowFocusCallback(window, focused);
 }
