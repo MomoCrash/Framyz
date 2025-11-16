@@ -3,7 +3,6 @@
 #ifndef COMPONENT_H
 #define COMPONENT_H
 
-#include "../../../../Tools/src/defines.h"
 #include "../../framework.h"
 
 class Entity;
@@ -72,6 +71,17 @@ struct Component : ComponentBase
     static constexpr uint64_t ComponentMask = 1 << static_cast<uint64_t>(typeID);
 };
 
-#define DECLARE_COMPONENT( name, parent ) struct name : parent<ComponentType::name>
+#define COMPONENT_DECLARE( name, parent ) struct name : parent<ComponentType::name>
+
+#define COMPONENT_EDITOR_HEADER(name) \
+    ImGui::SeparatorText(name "Component"); \
+
+#define COMPONENT_EDITOR_END(name) \
+    ImGui::Spacing(); \
+    if (ImGui::Button("Remove##" name)) { \
+        EntityFactory::RemoveComponent(this); \
+    }\
+
+#define 
 
 #endif //COMPONENT_H

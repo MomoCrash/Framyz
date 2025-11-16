@@ -7,7 +7,7 @@
 
 class Transform {
 
-    glm::mat4 m_transform;
+    glm::mat4 m_matrix;
 
     glm::vec3 m_forward;
     glm::vec3 m_right;
@@ -40,6 +40,7 @@ public:
     glm::vec3 down();
 
     void setPosition(glm::vec3 const& position);
+    void setPosition(float x, float y, float z);
     void offsetPosition(glm::vec3 const& position);
     
     void rotateYPR(glm::vec3 const&rotation);

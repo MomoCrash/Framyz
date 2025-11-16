@@ -7,12 +7,12 @@ Entity* EntityFactory::CreateEntity() {
 }
 
 ComponentBase * EntityFactory::CreateComponent(ComponentType type) {
-
     return EntityFactory::GetInstance()->ComponentBuilder[static_cast<int>(type)]();
-    
 }
 
 ComponentBase * EntityFactory::AttachComponent(ComponentType type, Entity *entityId) {
+    if (entityId->hasComponent(1 << static_cast<uint64_t>(type)))
+        return entityId->getComponent(1 << static_cast<uint64_t>(type));
 
     ComponentBase* base = CreateComponent(type);
     GameManager::GetEntityManager().attachComponent(base, entityId);

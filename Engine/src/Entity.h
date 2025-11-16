@@ -20,6 +20,7 @@ public:
 
     void preLoad(int id);
     void create(int id);
+    
     void destroy();
     [[nodiscard]] int* getId();
 
@@ -31,7 +32,6 @@ public:
     [[nodiscard]] uint32_t getTag() const { return m_tag; }
     
     Transform& getTransform() { return m_transform; }
-    
 
 protected:
     bool m_isCreated;

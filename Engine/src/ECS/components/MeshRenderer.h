@@ -5,7 +5,7 @@
 
 #include "ComponentBase.h"
 
-DECLARE_COMPONENT( MeshRenderer, Component )
+COMPONENT_DECLARE( MeshRenderer, Component )
 {
     MeshRenderer();
     

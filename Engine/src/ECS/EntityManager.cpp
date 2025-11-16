@@ -14,6 +14,7 @@ void EntityManager::update() {
     for (int i = 0; i < m_entityCount; i++) {
 
         Entity* entity = m_entities[i]->Entity;
+        entity->update();
         
         if (entity->isDestroyed()) {
             
@@ -59,6 +60,10 @@ void EntityManager::update() {
     }
     
     
+}
+
+void EntityManager::fixedUpdate() {
+    // TODO : Implement FixedUpdate on entities
 }
 
 Entity * EntityManager::createEntity() {

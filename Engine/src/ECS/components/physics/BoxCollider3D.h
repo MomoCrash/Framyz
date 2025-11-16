@@ -6,7 +6,7 @@
 #include "Collider3D.h"
 #include "../ComponentBase.h"
 
-DECLARE_COMPONENT( BoxCollider3D, Component ), public Collider3D
+COMPONENT_DECLARE( BoxCollider3D, Component ), public Collider3D
 {
     BoxCollider3D();
 

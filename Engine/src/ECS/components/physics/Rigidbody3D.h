@@ -5,7 +5,7 @@
 
 #include "../ComponentBase.h"
 
-DECLARE_COMPONENT( Rigidbody3D, Component ) {
+COMPONENT_DECLARE( Rigidbody3D, Component ) {
 	
     Rigidbody3D();
 

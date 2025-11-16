@@ -22,7 +22,10 @@ void HierarchyWindow::draw() {
     
     ImGui::SeparatorText("Hierarchy");
     if (ImGui::Button("Create entity")) {
-        m_editorSystem->getInspector()->setInspectedObject(EntityFactory::CreateEntity());
+        Entity* entity = EntityFactory::CreateEntity();
+        EntityFactory::AttachComponent(ComponentType::MeshRenderer, entity);
+        
+        m_editorSystem->getInspector()->setInspectedObject(entity);
     }
     
     for (int i = 0; i < m_entityManager->getEntityCount(); i++) {

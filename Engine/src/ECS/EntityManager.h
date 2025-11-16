@@ -24,6 +24,7 @@ public:
     ~EntityManager() = default;
 
     void update();
+    void fixedUpdate();
     
     Entity* createEntity();
     Entity* createEntity(Entity* parent);

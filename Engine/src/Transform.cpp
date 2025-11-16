@@ -9,7 +9,7 @@ Transform::Transform() {
 }
 
 glm::mat4& Transform::getMatrix() {
-    return m_transform;
+    return m_matrix;
 }
 
 glm::vec3& Transform::getPosition()
@@ -56,6 +56,13 @@ void Transform::setPosition(glm::vec3 const& position)
     m_position = position;
 }
 
+void Transform::setPosition(float x, float y, float z)
+{
+    m_position.x = x;
+    m_position.y = y;
+    m_position.z = z;
+}
+
 void Transform::offsetPosition(glm::vec3 const& position)
 {
     m_position += position;
@@ -81,11 +88,11 @@ void Transform::rotateYPR(glm::vec3 const& rotation)
 void Transform::update()
 {
     
-    m_transform = glm::mat4(1.0f);
+    m_matrix = glm::mat4(1.0f);
     
-    m_transform = scale(m_transform, m_scale);
-    m_transform *= m_rotationMatrix;
-    m_transform = translate(m_transform, m_position);
+    m_matrix = scale(m_matrix, m_scale);
+    m_matrix *= m_rotationMatrix;
+    m_matrix = translate(m_matrix, m_position);
     
 }
 

@@ -68,7 +68,6 @@ void RenderSystem::update() {
         
         Entity* entity = m_manager->getEntity(i);
         if (MeshRenderer* meshRenderer = m_manager->getComponent<MeshRenderer>(entity)) {
-            entity->update();
             
 #ifdef FRAMYZ_EDITOR
             OutTexture->drawObject(*DefaultPipeline, *meshRenderer->Object);

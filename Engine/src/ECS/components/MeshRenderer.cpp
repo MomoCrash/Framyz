@@ -10,19 +10,16 @@ MeshRenderer::MeshRenderer() : Object(nullptr) {
 }
 
 void MeshRenderer::EDITOR_Display() {
-    Component::EDITOR_Display();
 
-    ImGui::SeparatorText("Mesh Renderer Component");
+    COMPONENT_EDITOR_HEADER("Mesh Renderer")
+    
     ImGui::Text(Object->getMesh()->getAssetName());
     ImGui::SameLine(0, 10);
     if (ImGui::Button("Browse")) {
         Object->setMesh(AssetLoader::getRenderAsset(Asset::Render::PLANE));
     }
-    ImGui::Spacing();
-    if (ImGui::Button("Remove")) {
-        EntityFactory::RemoveComponent(this);
-    }
     
+    COMPONENT_EDITOR_END("Mesh Renderer")
 }
 
 void MeshRenderer::instantiate() {

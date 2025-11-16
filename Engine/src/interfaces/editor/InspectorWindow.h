@@ -11,6 +11,13 @@ class RenderObject;
 
 class InspectorWindow : IEditorWindow
 {
+
+    struct OptionsComponent
+    {
+        int Id;
+        std::string Name;
+    };
+    
 public:
     InspectorWindow();
     ~InspectorWindow();
@@ -24,7 +31,7 @@ public:
 
 private:
     Entity* m_inspectedObject;
-    std::vector<std::string> m_options;
+    std::vector<OptionsComponent> m_options;
 
     static inline float* m_position[3] = {
         0,

@@ -158,17 +158,17 @@ public:
 		return ValidateResult::AcceptAllContactsForThisBodyPair;
 	}
 
-	virtual void			OnContactAdded(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
+	virtual void OnContactAdded(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
 	{
 		cout << "A contact was added" << endl;
 	}
 
-	virtual void			OnContactPersisted(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
+	virtual void  OnContactPersisted(const Body &inBody1, const Body &inBody2, const ContactManifold &inManifold, ContactSettings &ioSettings) override
 	{
 		cout << "A contact was persisted" << endl;
 	}
 
-	virtual void			OnContactRemoved(const SubShapeIDPair &inSubShapePair) override
+	virtual void OnContactRemoved(const SubShapeIDPair &inSubShapePair) override
 	{
 		cout << "A contact was removed" << endl;
 	}
@@ -178,12 +178,12 @@ public:
 class MyBodyActivationListener : public BodyActivationListener
 {
 public:
-	virtual void		OnBodyActivated(const BodyID &inBodyID, uint64 inBodyUserData) override
+	virtual void OnBodyActivated(const BodyID &inBodyID, uint64 inBodyUserData) override
 	{
 		cout << "A body got activated" << endl;
 	}
 
-	virtual void		OnBodyDeactivated(const BodyID &inBodyID, uint64 inBodyUserData) override
+	virtual void OnBodyDeactivated(const BodyID &inBodyID, uint64 inBodyUserData) override
 	{
 		cout << "A body went to sleep" << endl;
 	}

@@ -4,6 +4,7 @@
 #define SCENE_H
 
 class Scene {
+    
 public:
     virtual ~Scene() = default;
     void virtual OnEnter() = 0;
@@ -11,6 +12,7 @@ public:
     void virtual OnUpdate() = 0;
     void virtual OnExit() = 0;
     void virtual Render() = 0;
+    
 };
 
 #endif //SCENE_H

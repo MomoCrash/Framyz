@@ -101,14 +101,14 @@ void PhysicSystem::create() {
 	// A body activation listener gets notified when bodies activate and go to sleep
 	// Note that this is called from a job so whatever you do here needs to be thread safe.
 	// Registering one is entirely optional.
-	MyBodyActivationListener body_activation_listener;
-	m_physicsSystem->SetBodyActivationListener(&body_activation_listener);
+	m_activationListener = new MyBodyActivationListener();
+	m_physicsSystem->SetBodyActivationListener(m_activationListener);
 
 	// A contact listener gets notified when bodies (are about to) collide, and when they separate again.
 	// Note that this is called from a job so whatever you do here needs to be thread safe.
 	// Registering one is entirely optional.
-	MyContactListener contact_listener;
-	m_physicsSystem->SetContactListener(&contact_listener);
+	m_contactListener = new MyContactListener();
+	m_physicsSystem->SetContactListener(m_contactListener);
 
 	// We simulate the physics world in discrete time steps. 60 Hz is a good rate to update the physics system.
 
@@ -129,11 +129,12 @@ void PhysicSystem::fixedUpdate() {
 		
 			Rigidbody3D* body = reinterpret_cast<Rigidbody3D *>(entity->getComponent(Rigidbody3D::ComponentMask));
 			if (!body->IsValid) continue;
-
+			
 			RVec3 position = body_interface.GetCenterOfMassPosition(body->BodyID);
 			Vec3 velocity = body_interface.GetLinearVelocity(body->BodyID);
 			cout << "Entity " << i << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << endl;
-			
+
+			body->GetOwner()->setPosition(position.GetX(), position.GetY(), position.GetZ());
 		}
 		
 	}
@@ -147,6 +148,7 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 
 	if (component->is(BoxCollider3D::ComponentMask)) {
 		BoxCollider3D *collider = dynamic_cast<BoxCollider3D*>(component);
+		
 	    BodyInterface &body_interface = m_physicsSystem->GetBodyInterface();
 		
 		BoxShapeSettings boxShape(Vec3(collider->Extend.x, collider->Extend.y, collider->Extend.z));
@@ -156,10 +158,13 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		ShapeSettings::ShapeResult boxShapeResult = boxShape.Create();
 		ShapeRefC floor_shape = boxShapeResult.Get(); // We don't expect an error here, but you can check floor_shape_result for HasError() / GetError()
 
+		Transform& componentTransform = component->GetOwner()->getTransform();
 		// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
 		BodyCreationSettings boxSettings(floor_shape,
-			RVec3(0.0_r, -2.0_r, 0.0_r),
-			Quat::sIdentity(), collider->MotionType, collider->Layer);
+			RVec3(	componentTransform.getPosition().x,
+							componentTransform.getPosition().y,
+							componentTransform.getPosition().z),
+			Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
 		// Create the actual rigid body
 		collider->BodySettings = body_interface.CreateBody(boxSettings); // Note that if we run out of bodies this can return nullptr
@@ -180,17 +185,20 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		
 		// Now create a dynamic body to bounce on the floor
 		// Note that this uses the shorthand version of creating and adding a body to the world
+		Transform& componentTransform = component->GetOwner()->getTransform();
 		BodyCreationSettings sphereCollider(new SphereShape(0.5f),
-			RVec3(0.0_r, 1.0_r, 0.0_r), Quat::sIdentity(),
-			collider->MotionType, collider->Layer);
+				RVec3(componentTransform.getPosition().x,
+						componentTransform.getPosition().y,
+						componentTransform.getPosition().z), Quat::sIdentity(),
+						JPH::EMotionType::Dynamic, collider->Layer);
 		// Create the actual rigid body
 		collider->BodySettings = body_interface.CreateBody(sphereCollider); // Note that if we run out of bodies this can return nullptr
 		// Add it to the world
 		body_interface.AddBody(collider->BodySettings->GetID(), collider->Activated);
 		collider->BodyID = collider->BodySettings->GetID();
 
-		body_interface.SetLinearVelocity(collider->BodyID, Vec3(0.0f, -5.0f, 0.0f));
-
+		body_interface.SetLinearVelocity(collider->BodyID, Vec3(0.0f, 0.0f, 0.0f));
+		
 		if (component->GetOwner()->hasComponent(Rigidbody3D::ComponentMask)) {
 			Rigidbody3D* body = dynamic_cast<Rigidbody3D *>(component->GetOwner()->getComponent(Rigidbody3D::ComponentMask));
 			body->BodyID = collider->BodySettings->GetID();

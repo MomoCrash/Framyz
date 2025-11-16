@@ -5,7 +5,7 @@
 
 #include "ComponentBase.h"
 
-DECLARE_COMPONENT( Camera, Component )
+COMPONENT_DECLARE( Camera, Component )
 {
     Camera();
     

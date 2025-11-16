@@ -11,14 +11,9 @@ BoxCollider3D::BoxCollider3D() {
 }
 
 void BoxCollider3D::EDITOR_Display() {
-    Component::EDITOR_Display();
-
-    ImGui::SeparatorText("Box Collider Component");
-
-    if (ImGui::Button("Remove")) {
-        EntityFactory::RemoveComponent(this);
-    }
+    COMPONENT_EDITOR_HEADER("Box Collider 3D");
     
+    COMPONENT_EDITOR_END("Box Collider 3D")
 }
 
 void BoxCollider3D::instantiate() {

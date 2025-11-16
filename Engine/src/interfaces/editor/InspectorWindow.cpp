@@ -20,8 +20,10 @@ void InspectorWindow::updateParameters()
 {
     m_options.clear();
     for (int i = 0; i < static_cast<int>(ComponentType::Size); i++) {
-        if (!m_inspectedObject->hasComponent(1 << i))
-            m_options.push_back(to_string(static_cast<ComponentType>(i)));
+        if (!m_inspectedObject->hasComponent(1 << i)) {
+            OptionsComponent option {i, to_string(static_cast<ComponentType>(i))};
+            m_options.push_back(option);
+        }
     }
 
     m_position[0] = &m_inspectedObject->getPosition().x;
@@ -43,7 +45,7 @@ void InspectorWindow::draw()
 
     static bool hasSelected = false;
     static const char* current_item = "Create new Component";
-    static int currentIndex = -1;
+    static OptionsComponent selectedComponent {-1};
     ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
     
     ImGuiStyle& style = ImGui::GetStyle();
@@ -57,10 +59,10 @@ void InspectorWindow::draw()
     {
 
         for (int i = 0; i < m_options.size(); i++) {
-            bool is_selected = (current_item == m_options[i]);
-            if (ImGui::Selectable(m_options[i].c_str(), is_selected)) {
-                current_item = m_options[i].c_str();
-                currentIndex = i;
+            bool is_selected = (current_item == m_options[i].Name);
+            if (ImGui::Selectable(m_options[i].Name.c_str(), is_selected)) {
+                current_item = m_options[i].Name.c_str();
+                selectedComponent.Id = m_options[i].Id;
                 hasSelected = true;
             }
             if (is_selected)
@@ -73,7 +75,7 @@ void InspectorWindow::draw()
         ImGui::SameLine(0, 10);
         if (ImGui::Button("Create")) {
 
-            EntityFactory::AttachComponent(static_cast<ComponentType>(currentIndex), m_inspectedObject);
+            EntityFactory::AttachComponent(static_cast<ComponentType>(selectedComponent.Id), m_inspectedObject);
             hasSelected = false;
             current_item = "Create new Component";
             updateParameters();
