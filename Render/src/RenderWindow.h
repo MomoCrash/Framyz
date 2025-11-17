@@ -13,9 +13,22 @@ class Sampler;
 class RenderPipeline;
 class RenderObject;
 
+struct CameraInformation {
+	float Fov;
+	float AspectRatio;
+	float ZNear;
+	float ZFar;
+
+	glm::mat4x4 Position;
+	CameraInformation()
+		: Fov(75.f), AspectRatio(4.f / 3.f), ZNear(0.1f), ZFar(100.f), Position(glm::mat4x4(1.0f)) {
+	}
+};
+
 class RenderWindow : public Window {
 
 public:
+	
 	static const int MAX_FRAMES_IN_FLIGHT = 2;
 
 	RenderWindow(const char* windowTitle, int width, int height);
@@ -37,7 +50,7 @@ public:
 	UniformBufferObject& GetGlobalBuffer();
 	uint32_t getCurrentFrame();
 
-	void update(float width, float height);
+	void update(CameraInformation const& camerafloat);
 
 	void beginFrame();
 	void beginDraw();

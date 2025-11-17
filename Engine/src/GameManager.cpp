@@ -27,8 +27,8 @@ void GameManager::Run() {
         }
 
         manager.m_accumulator += manager.m_clock.GetDeltaTime();
-        float deltaTime = manager.m_clock.GetUnscaledDeltaTime();
         int steps = 0;
+        float deltaTime = manager.m_clock.GetFixedDeltaTime();
         while (manager.m_accumulator >= deltaTime && steps < MAX_PHYSICS_STEPS) {
             for (auto *system: manager.m_systems) {
                 system->fixedUpdate();
@@ -40,6 +40,8 @@ void GameManager::Run() {
         if (steps == MAX_PHYSICS_STEPS) {
             manager.m_accumulator = 0.0;
         }
+        
+        manager.m_clock.UpdateTime();
     }
 
     for (auto* system : manager.m_systems) {

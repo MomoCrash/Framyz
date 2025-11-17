@@ -19,6 +19,8 @@ class Transform {
     glm::vec3 m_rotation;
     glm::mat4 m_rotationMatrix;
 
+    bool      m_isDirty = false;
+
     enum UpdateMask : uint8_t {
         POSITION,
         ROTATION,

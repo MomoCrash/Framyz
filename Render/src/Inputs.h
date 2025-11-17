@@ -162,16 +162,19 @@ public:
     };
 
 private:
-    static std::map<KeyCode, KeyStatus> m_statusKey;
-    static std::map<KeyMouseCode, KeyStatus> m_statusMouse;
-    static bool m_init              ;
-    static double m_mousePosX       ;
-    static double m_mousePosY       ;
-    static double m_deltaMousePosX  ;
-    static double m_deltaMousePosY  ;
+    static inline std::map<KeyCode, KeyStatus> m_statusKey;
+    static inline std::map<KeyMouseCode, KeyStatus> m_statusMouse;
+    static inline bool m_init                 = false ;
+    static inline double m_mousePosX          = 0;
+    static inline double m_mousePosY          = 0;
+    static inline double m_deltaMousePosX     = 0;
+    static inline double m_deltaMousePosY     = 0;
+    static inline double m_deltaMouseScrollX  = 0;
+    static inline double m_deltaMouseScrollY  = 0;
     
     static void UpdateKey(KeyCode _key, KeyStatus _status);
     static void UpdateMouse(KeyMouseCode _key, KeyStatus _status);
+    static void UpdateScroll(float xoffset, float yoffset);
     static void Update(GLFWwindow *_win);
 
 public:
@@ -184,8 +187,14 @@ public:
     static bool IsMouseButtonJustPressed(KeyMouseCode _key);
     static bool IsMouseButtonJustReleased(KeyMouseCode _key);
     static KeyStatus GetMouseButtonStatus(KeyMouseCode _key);
-    static glm::dvec2 GetMousePosition();
-    static glm::dvec2 GetDeltaMousePosition();
+    
+    static float GetScrollOffsetX();
+    static float GetScrollOffsetY();
+    
+    static float GetMouseX();
+    static float GetMouseY();
+    static float GetDeltaMouseX();
+    static float GetDeltaMouseY();
 
     friend Window;
     friend RenderWindow;

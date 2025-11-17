@@ -49,6 +49,7 @@ void Window::SetMouseButtonCallback(GLFWwindow *window, int button, int action, 
 
 void Window::SetScrollCallback(GLFWwindow *window, double xoffset, double yoffset) {
     ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+    Input::UpdateScroll(xoffset, yoffset);
 }
 
 void Window::SetFocusCallback(GLFWwindow *window, int focused) {

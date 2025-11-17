@@ -307,7 +307,7 @@ uint32_t RenderWindow::flushCommand()
     return imageIndex;
 }
 
-void RenderWindow::update(float width, float height)
+void RenderWindow::update(CameraInformation const& cam)
 {
 
     // Update Uniform Bffer
@@ -315,8 +315,11 @@ void RenderWindow::update(float width, float height)
     
     frameCounter++;
 
-    m_globalBuffer.view = glm::lookAt(glm::vec3(0.0f, 0.0f,  -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    m_globalBuffer.proj = glm::perspective(glm::radians(70.0f), width / height, 0.1f, 256.0f);
+    // m_globalBuffer.view = glm::lookAt(glm::vec3(0.0f, 0.0f,  -5.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    // m_globalBuffer.proj = glm::perspective(glm::radians(70.0f), width / height, 0.1f, 256.0f);
+
+    m_globalBuffer.proj = glm::perspective(glm::radians(cam.Fov), cam.AspectRatio, cam.ZNear, cam.ZFar);
+    m_globalBuffer.view = glm::inverse(cam.Position);
     m_globalBuffer.proj[1][1] *= -1.0f;
     
     float fpsTimer = (float)(std::chrono::duration<double, std::milli>(now - lastTime).count());

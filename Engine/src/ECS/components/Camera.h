@@ -12,7 +12,10 @@ COMPONENT_DECLARE( Camera, Component )
     void EDITOR_Display() override;
     void instantiate() override;
 
-    float FOV = 0;
+    float Fov = 75.0f;
+    float AspectRatio = 4.f/3.f;
+    float ZNear = 0.1f;
+    float ZFar = 256.f;
     
 };
 

@@ -36,7 +36,7 @@ void NodeEditor::draw()
     
     if (window == nullptr) return;
 
-    window->update(500, 500);
+    window->update(cameraInfo);
     window->beginFrame();
 
     contextGuiHandlers->setContext(index);

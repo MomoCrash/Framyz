@@ -3,13 +3,6 @@
 //
 
 #include "Inputs.h"
-std::map<Input::KeyCode, Input::KeyStatus>         Input::m_statusKey;
-std::map<Input::KeyMouseCode, Input::KeyStatus>    Input::m_statusMouse;
-bool    Input::m_init            = false;
-double  Input::m_mousePosX       = 0;
-double  Input::m_mousePosY       = 0;
-double  Input::m_deltaMousePosX  = 0;
-double  Input::m_deltaMousePosY  = 0;
 
 void Input::UpdateKey(KeyCode _key, KeyStatus _status) {
     m_statusKey[_key] =_status;
@@ -17,6 +10,12 @@ void Input::UpdateKey(KeyCode _key, KeyStatus _status) {
 
 void Input::UpdateMouse(KeyMouseCode _key, KeyStatus _status) {
     m_statusMouse[_key] =_status;
+}
+
+void Input::UpdateScroll(float xoffset, float yoffset) {
+    m_deltaMouseScrollX = xoffset;
+    m_deltaMouseScrollY = yoffset;
+    std::cout << m_deltaMouseScrollY << std::endl;
 }
 
 void Input::Update(GLFWwindow* _win) {
@@ -47,6 +46,8 @@ void Input::Update(GLFWwindow* _win) {
         m_deltaMousePosX = m_mousePosX - posx;
         m_deltaMousePosY = m_mousePosY - posy;
     }
+    m_deltaMouseScrollY = 0;
+    m_deltaMouseScrollX = 0;
     m_init = true;
 }
 
@@ -107,11 +108,26 @@ Input::KeyStatus Input::GetMouseButtonStatus(KeyMouseCode _key) {
     return RELEASED;
 }
 
-glm::dvec2 Input::GetMousePosition() {
-    return {m_mousePosX, m_mousePosY};
+float Input::GetScrollOffsetX() {
+    return m_deltaMouseScrollX;
 }
 
-glm::dvec2 Input::GetDeltaMousePosition() {
-    return {m_deltaMousePosX, m_deltaMousePosY};
+float Input::GetScrollOffsetY() {
+    return m_deltaMouseScrollY;
 }
 
+float Input::GetMouseX() {
+    return m_mousePosX;
+}
+
+float Input::GetMouseY() {
+    return m_mousePosY;
+}
+
+float Input::GetDeltaMouseX() {
+    return m_deltaMousePosX;
+}
+
+float Input::GetDeltaMouseY() {
+    return m_deltaMousePosY;
+}

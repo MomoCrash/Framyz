@@ -6,9 +6,11 @@
 
 struct NodeEditor : ImFlow::BaseNode, IEditorWindow
 {
-    ImFlow::ImNodeFlow mINF;
-    RenderWindow* window;
-    GuiHandler* contextGuiHandlers;
+    ImFlow::ImNodeFlow  mINF;
+    RenderWindow*       window;
+    GuiHandler*         contextGuiHandlers;
+
+    CameraInformation   cameraInfo;
 
     int index = 0;
     bool m_isOpen = false;

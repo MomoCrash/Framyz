@@ -5,6 +5,7 @@
 
 #include "../IEditorWindow.h"
 #include "../../framework.h"
+#include "../../ECS/components/Camera.h"
 
 struct RenderSystem;
 
@@ -13,8 +14,7 @@ class SceneWindow : IEditorWindow {
 public:
     SceneWindow();
     ~SceneWindow();
-
-
+    
     void setRenderWindow(RenderSystem* renderWindow);
     void setRenderImage(VkImageView image, uint32_t index);
 
@@ -25,8 +25,15 @@ public:
 
 private:
     VkDescriptorSet m_renderedImages[RenderWindow::MAX_FRAMES_IN_FLIGHT];
+    
     RenderSystem* m_renderWindow;
+    CameraInformation m_cameraInfo;
+    
+    Camera* m_camera;
+    float m_speed = 10.f;
 
+    float m_smoothScroll = 0.f;
+    float m_smoothDuration = 0.2f;
 };
 
 

@@ -22,6 +22,7 @@ private:
     static ComponentBase* CreateComponent() {
         return new Type();
     }
+    static ComponentBase* CreateComponent(ComponentType type);
 
     static EntityFactory* GetInstance() {
         static EntityFactory factory;
@@ -37,11 +38,11 @@ private:
 
 public:
     static Entity* CreateEntity();
+
     template <typename C>
     static C* AttachComponent(Entity* entityId);
-
-    static ComponentBase* CreateComponent(ComponentType type);
     static ComponentBase* AttachComponent(ComponentType type, Entity* entityId);
+
     static void RemoveComponent(ComponentBase* component);
 
 };

@@ -25,6 +25,10 @@ void EditorSystem::create() {
     m_sceneWindow->setRenderImage(m_renderSystem->OutTexture->getImage(0), 0);
     m_sceneWindow->setRenderImage(m_renderSystem->OutTexture->getImage(1), 1);
 #endif
+
+    m_inspectorWindow->open();
+    m_hierarchyWindow->open();
+    m_sceneWindow->open();
     
     m_nodeEditor = new NodeEditor(m_gui);
     
