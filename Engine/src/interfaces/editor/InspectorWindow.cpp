@@ -26,13 +26,13 @@ void InspectorWindow::updateParameters()
         }
     }
 
-    m_position[0] = &m_inspectedObject->getPosition().x;
-    m_position[1] = &m_inspectedObject->getPosition().y;
-    m_position[2] = &m_inspectedObject->getPosition().z;
+    m_position[0] = &m_inspectedObject->getLocalPosition().x;
+    m_position[1] = &m_inspectedObject->getLocalPosition().y;
+    m_position[2] = &m_inspectedObject->getLocalPosition().z;
     
-    m_rotation[0] = &m_inspectedObject->getRotation().x;
-    m_rotation[1] = &m_inspectedObject->getRotation().y;
-    m_rotation[2] = &m_inspectedObject->getRotation().z;
+    m_rotation[0] = &m_inspectedObject->getLocalRotation().x;
+    m_rotation[1] = &m_inspectedObject->getLocalRotation().y;
+    m_rotation[2] = &m_inspectedObject->getLocalRotation().z;
 }
 
 void InspectorWindow::draw()
@@ -83,11 +83,12 @@ void InspectorWindow::draw()
     }
 
     ImGui::SeparatorText("Transform");
-    ImGui::DragFloat3("Position", *m_position, 0.1);
-    glm::vec3 oldRotation = glm::vec3(m_inspectedObject->getRotation());
+    if (ImGui::DragFloat3("Position", *m_position, 0.1)) {
+        m_inspectedObject->setDirty();
+    }
     if (ImGui::DragFloat3("Rotation", *m_rotation, 0.1)) {
-        glm::vec3 newRotation = oldRotation - m_inspectedObject->getRotation();
-        m_inspectedObject->rotateYPR(newRotation);
+        m_inspectedObject->setDirty();
+        m_inspectedObject->updateRotation();
     }
 
     

@@ -62,18 +62,14 @@ void RenderSystem::update() {
     Window->beginDraw();
 #endif
     
+    Window->update(m_currentCamera);
+    
     for (int i = 0; i < m_manager->getEntityCount(); i++) {
         
         Entity* entity = m_manager->getEntity(i);
-        if (MeshRenderer* meshRenderer = m_manager->getComponent<MeshRenderer>(entity)) {
-            
-#ifdef FRAMYZ_EDITOR
-            OutTexture->drawObject(*DefaultPipeline, *meshRenderer->Object);
-#else
-            Window->drawObject(*DefaultPipeline, *meshRenderer->Object);
-#endif
-            
-        }
+        updateAsMeshRenderer(entity);
+        updateAsCamera(entity);
+        
     }
 
     DefaultPipeline->Update(Window->GetGlobalBuffer(), Window->getRenderContext().getCurrentFrame());
@@ -86,4 +82,34 @@ void RenderSystem::update() {
     Window->display();
 #endif
     
+}
+
+void RenderSystem::updateAsMeshRenderer(Entity* entity) const {
+    if (!entity->hasComponent(MeshRenderer::ComponentMask)) return;
+    if (MeshRenderer* meshRenderer = m_manager->getComponent<MeshRenderer>(entity)) {
+            
+#ifdef FRAMYZ_EDITOR
+        OutTexture->drawObject(*DefaultPipeline, *meshRenderer->Object);
+#else
+        Window->drawObject(*DefaultPipeline, *meshRenderer->Object);
+#endif
+            
+    }
+}
+
+void RenderSystem::updateAsCamera(Entity *entity) {
+    if (!entity->hasComponent(Camera::ComponentMask)) return;
+    if (Camera* camera = m_manager->getComponent<Camera>(entity)) {
+
+        camera->updateCamera();
+        
+        m_currentCamera.Fov     = camera->Fov;
+        m_currentCamera.AspectRatio = camera->AspectRatio;
+        m_currentCamera.ZFar    = camera->ZFar;
+        m_currentCamera.ZNear   = camera->ZNear;
+        m_currentCamera.View    = camera->Matrix;
+    
+        Window->update(m_currentCamera);
+            
+    }
 }

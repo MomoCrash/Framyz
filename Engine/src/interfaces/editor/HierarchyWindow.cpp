@@ -29,8 +29,10 @@ void HierarchyWindow::draw() {
     }
     
     for (int i = 0; i < m_entityManager->getEntityCount(); i++) {
+        Entity* entity = m_entityManager->getEntity(i);
+        if (entity->isDebugOnly()) continue;
         if (ImGui::Button(std::to_string(i).c_str(), ImVec2(ImGui::GetWindowWidth()/4, 20))) {
-            m_editorSystem->getInspector()->setInspectedObject(m_entityManager->getEntity(i));
+            m_editorSystem->getInspector()->setInspectedObject(entity);
         }
         ImGui::Spacing();
     }

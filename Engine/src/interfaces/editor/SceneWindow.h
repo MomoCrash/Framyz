@@ -30,10 +30,11 @@ private:
     CameraInformation m_cameraInfo;
     
     Camera* m_camera;
-    float m_speed = 10.f;
+    float m_speed           = 10.f;
+    float m_sensibility     = 50.f;
 
-    float m_smoothScroll = 0.f;
-    float m_smoothDuration = 0.2f;
+    float m_smoothScroll    = 0.f;
+    float m_smoothDuration  = 0.2f;
 };
 
 

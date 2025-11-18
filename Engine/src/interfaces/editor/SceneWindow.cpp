@@ -31,6 +31,7 @@ void SceneWindow::setRenderImage(VkImageView image, uint32_t index) {
 
 void SceneWindow::open() {
     Entity* entity = EntityFactory::CreateEntity();
+    entity->setDebugOnly(true);
     m_camera = EntityFactory::AttachComponent<Camera>(entity);
 }
 
@@ -40,20 +41,21 @@ void SceneWindow::close() {
 
 void SceneWindow::draw() {
 
-    float finalSpeed = GameManager::GetClock().GetDeltaTime() * m_speed;
-    m_smoothScroll += GameManager::GetClock().GetDeltaTime();
+    float deltaTime     = GameManager::GetClock().GetDeltaTime();
+    float finalSpeed    = deltaTime * m_speed;
+    m_smoothScroll      += deltaTime;
     
     if (Input::GetKeyStatus(Input::W)) {
-        m_camera->GetOwner()->offsetPosition(-m_camera->GetOwner()->forward() * finalSpeed);
+        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Forward * finalSpeed);
     }
     if (Input::GetKeyStatus(Input::S)) {
-        m_camera->GetOwner()->offsetPosition(m_camera->GetOwner()->forward() * finalSpeed);
+        m_camera->GetOwner()->offsetLocalPosition(m_camera->Forward * finalSpeed);
     }
     if (Input::GetKeyStatus(Input::D)) {
-        m_camera->GetOwner()->offsetPosition(m_camera->GetOwner()->right() * finalSpeed);
+        m_camera->GetOwner()->offsetLocalPosition(m_camera->Right * finalSpeed);
     }
     if (Input::GetKeyStatus(Input::A)) {
-        m_camera->GetOwner()->offsetPosition(-m_camera->GetOwner()->right() * finalSpeed);
+        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Right * finalSpeed);
     }
     
     if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetScrollOffsetY() > 0) {
@@ -71,11 +73,13 @@ void SceneWindow::draw() {
         }
     }
     if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetDeltaMouseX() != 0) {
-        m_camera->GetOwner()->rotateYPR({0, 0, Input::GetDeltaMouseX()});
+        m_camera->Yaw += Input::GetDeltaMouseX() * deltaTime * m_sensibility;
     }
     if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetDeltaMouseY() != 0) {
-        m_camera->GetOwner()->rotateYPR({Input::GetDeltaMouseY(), 0, 0});
-    } 
+        m_camera->Pitch += Input::GetDeltaMouseY() * deltaTime * m_sensibility;
+        m_camera->Pitch = glm::clamp(m_camera->Pitch, -89.0f, 89.0f);
+    }
+    
     
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         
@@ -84,13 +88,7 @@ void SceneWindow::draw() {
     ImGui::PopStyleVar();
     
     ImVec2 size = ImGui::GetWindowSize();
-    m_cameraInfo.Fov = m_camera->Fov;
-    m_cameraInfo.AspectRatio = size.x / size.y;
-    m_cameraInfo.ZFar = m_camera->ZFar;
-    m_cameraInfo.ZNear = m_camera->ZNear;
-    m_cameraInfo.Position = m_camera->GetOwner()->getMatrix();
-    
-    m_renderWindow->Window->update(m_cameraInfo);
+    m_camera->AspectRatio = size.x / size.y;
         
     ImGui::Image((ImTextureID)m_renderedImages[m_renderWindow->Window->getRenderContext().getCurrentFrame()], ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
     ImGui::End();

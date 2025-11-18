@@ -18,10 +18,11 @@ struct CameraInformation {
 	float AspectRatio;
 	float ZNear;
 	float ZFar;
+	int Display;
 
-	glm::mat4x4 Position;
+	glm::mat4x4 View;
 	CameraInformation()
-		: Fov(75.f), AspectRatio(4.f / 3.f), ZNear(0.1f), ZFar(100.f), Position(glm::mat4x4(1.0f)) {
+		: Fov(75.f), AspectRatio(4.f / 3.f), ZNear(0.1f), ZFar(100.f), View(glm::mat4x4(1.0f)) {
 	}
 };
 

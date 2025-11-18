@@ -13,7 +13,11 @@ DECLARE_SYSTEM(RenderSystem, BaseSystem, SystemType::RENDER_SYSTEM)
 
     void preCreate() override;
     void create() override;
+
     void update() override;
+
+    void updateAsMeshRenderer(Entity* entity) const;
+    void updateAsCamera(Entity* entity);
 
     RenderWindow* Window;
 
@@ -22,11 +26,13 @@ DECLARE_SYSTEM(RenderSystem, BaseSystem, SystemType::RENDER_SYSTEM)
     Texture* DefaultTexture;
     Sampler* DefaultSampler;
 
+    CameraInformation m_currentCamera;
 
+    bool m_hasCamera;
+    int m_currentDisplay;
 #ifdef FRAMYZ_EDITOR
     RenderTarget* OutTexture;
 #endif
-    
 
 };
 

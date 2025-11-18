@@ -112,7 +112,6 @@ void EditorSystem::update() {
 
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
-
     
     ImGui_ImplVulkan_RenderDrawData(draw_data, m_renderSystem->Window->getRenderContext().getCommandBuffer());
 

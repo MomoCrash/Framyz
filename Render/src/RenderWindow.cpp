@@ -319,7 +319,7 @@ void RenderWindow::update(CameraInformation const& cam)
     // m_globalBuffer.proj = glm::perspective(glm::radians(70.0f), width / height, 0.1f, 256.0f);
 
     m_globalBuffer.proj = glm::perspective(glm::radians(cam.Fov), cam.AspectRatio, cam.ZNear, cam.ZFar);
-    m_globalBuffer.view = glm::inverse(cam.Position);
+    m_globalBuffer.view = cam.View;
     m_globalBuffer.proj[1][1] *= -1.0f;
     
     float fpsTimer = (float)(std::chrono::duration<double, std::milli>(now - lastTime).count());

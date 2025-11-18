@@ -134,7 +134,7 @@ void PhysicSystem::fixedUpdate() {
 			Vec3 velocity = body_interface.GetLinearVelocity(body->BodyID);
 			cout << "Entity " << i << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << endl;
 
-			body->GetOwner()->setPosition(position.GetX(), position.GetY(), position.GetZ());
+			body->GetOwner()->setLocalPosition(position.GetX(), position.GetY(), position.GetZ());
 		}
 		
 	}
@@ -161,9 +161,9 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		Transform& componentTransform = component->GetOwner()->getTransform();
 		// Create the settings for the body itself. Note that here you can also set other properties like the restitution / friction.
 		BodyCreationSettings boxSettings(floor_shape,
-			RVec3(	componentTransform.getPosition().x,
-							componentTransform.getPosition().y,
-							componentTransform.getPosition().z),
+			RVec3(	componentTransform.getLocalPosition().x,
+							componentTransform.getLocalPosition().y,
+							componentTransform.getLocalPosition().z),
 			Quat::sIdentity(), JPH::EMotionType::Static, Layers::NON_MOVING);
 
 		// Create the actual rigid body
@@ -187,9 +187,9 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		// Note that this uses the shorthand version of creating and adding a body to the world
 		Transform& componentTransform = component->GetOwner()->getTransform();
 		BodyCreationSettings sphereCollider(new SphereShape(0.5f),
-				RVec3(componentTransform.getPosition().x,
-						componentTransform.getPosition().y,
-						componentTransform.getPosition().z), Quat::sIdentity(),
+				RVec3(componentTransform.getLocalPosition().x,
+						componentTransform.getLocalPosition().y,
+						componentTransform.getLocalPosition().z), Quat::sIdentity(),
 						JPH::EMotionType::Dynamic, collider->Layer);
 		// Create the actual rigid body
 		collider->BodySettings = body_interface.CreateBody(sphereCollider); // Note that if we run out of bodies this can return nullptr
