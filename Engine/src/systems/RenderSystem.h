@@ -6,8 +6,10 @@
 #include "BaseSystem.h"
 #include "../interfaces/interfaces.h"
 
+
 DECLARE_SYSTEM(RenderSystem, BaseSystem, SystemType::RENDER_SYSTEM)
 
+public:
     RenderSystem();
     ~RenderSystem() override;
 
@@ -16,26 +18,24 @@ DECLARE_SYSTEM(RenderSystem, BaseSystem, SystemType::RENDER_SYSTEM)
 
     void update() override;
 
+    bool CreateRenderLayer(SceneWindow::Layers layer, ImageLayoutType layout, RenderTarget** out);
     void updateAsMeshRenderer(Entity* entity) const;
     void updateAsCamera(Entity* entity);
 
+    std::map<SceneWindow::Layers, RenderTarget*> RenderTargets;
     RenderWindow* Window;
 
     // Other for tests
     RenderPipeline* DefaultPipeline;
-    Texture* DefaultTexture;
-    Sampler* DefaultSampler;
+    Texture*        DefaultTexture;
+    Sampler*        DefaultSampler;
 
     CameraInformation m_currentCamera;
 
     bool m_hasCamera;
     int m_currentDisplay;
-#ifdef FRAMYZ_EDITOR
-    RenderTarget* OutTexture;
-#endif
+
 
 };
-
-
 
 #endif //RENDERSYSTEM_H

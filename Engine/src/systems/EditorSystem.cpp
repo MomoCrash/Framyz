@@ -6,6 +6,21 @@
 #include "../GameManager.h"
 #include "../interfaces/editor/HierarchyWindow.h"
 
+EditorSystem::~EditorSystem() {
+    for (auto openedWindows : m_editorWindows) {
+        openedWindows->clear();
+        openedWindows->close();
+        delete openedWindows;
+    }
+    
+    m_editorWindows.clear();
+
+    m_nodeEditor->clear();
+    m_nodeEditor->close();
+    
+    delete m_gui;
+}
+
 void EditorSystem::create() {
 
     BaseSystem::create();
@@ -15,30 +30,31 @@ void EditorSystem::create() {
     m_gui = new GuiHandler();
     m_guiIndex = m_gui->inject(m_renderSystem->Window);
     
-    m_inspectorWindow = new InspectorWindow();
+    InspectorWindow* inspectorWindow = new InspectorWindow();
+    AttachWindow(inspectorWindow);
     
-    m_hierarchyWindow = new HierarchyWindow(this);
+    HierarchyWindow* hierarchyWindow = new HierarchyWindow();
+    AttachWindow(hierarchyWindow);
     
-    m_sceneWindow = new SceneWindow();
-    m_sceneWindow->setRenderWindow(m_renderSystem);
-#ifdef FRAMYZ_EDITOR
-    m_sceneWindow->setRenderImage(m_renderSystem->OutTexture->getImage(0), 0);
-    m_sceneWindow->setRenderImage(m_renderSystem->OutTexture->getImage(1), 1);
-#endif
-
-    m_inspectorWindow->open();
-    m_hierarchyWindow->open();
-    m_sceneWindow->open();
+    SceneWindow* sceneWindow = new SceneWindow();
+    sceneWindow->setRenderWindow(m_renderSystem);
     
     m_nodeEditor = new NodeEditor(m_gui);
+
+    for (auto & editorWindow : m_editorWindows) {
+        editorWindow->create();
+        editorWindow->open();
+    }
+
+    m_renderSystem->CreateRenderLayer(SceneWindow::LAYER_SCENE, IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, &m_editorRender);
     
 }
 
 void EditorSystem::update() {
-    
-    if (m_renderSystem->Window->shouldClose()) return;
-    
-    m_renderSystem->Window->beginDraw();
+}
+
+void EditorSystem::draw() {
+    BaseSystem::draw();
 
     m_gui->setContext(m_guiIndex);
     
@@ -106,26 +122,26 @@ void EditorSystem::update() {
     
     ImGui::End();
 
-    m_inspectorWindow->draw();
-    m_hierarchyWindow->draw();
-    m_sceneWindow->draw();
+    for (auto& attachedWindows : m_editorWindows) {
+        attachedWindows->draw();
+    }
 
     ImGui::Render();
     ImDrawData* draw_data = ImGui::GetDrawData();
     
     ImGui_ImplVulkan_RenderDrawData(draw_data, m_renderSystem->Window->getRenderContext().getCommandBuffer());
 
-    m_renderSystem->Window->endDraw();
-    m_renderSystem->Window->display();
-
     m_nodeEditor->draw();
-
 }
 
 void EditorSystem::AddRender(RenderSystem *system) {
     m_renderSystem = system;
 }
 
-InspectorWindow * EditorSystem::getInspector() {
-    return m_inspectorWindow;
+void EditorSystem::AttachWindow(IEditorWindow *window) {
+    m_editorWindows.push_back(window);
+}
+
+NodeEditor * EditorSystem::getNodeEditor() {
+    return m_nodeEditor;
 }

@@ -21,11 +21,13 @@ namespace SystemType {
 
 struct BaseSystem {
     explicit BaseSystem();
+    virtual ~BaseSystem() = default;
 
     virtual void preCreate();
     virtual void create();
     
-    virtual void update() = 0;
+    virtual void update()   = 0;
+    virtual void draw();
     virtual void fixedUpdate();
     
     virtual void destroy();
@@ -37,8 +39,6 @@ struct BaseSystem {
     bool        Created = false;
 
 protected:
-    virtual ~BaseSystem() = default;
-
     EntityManager*  m_manager;
 };
 

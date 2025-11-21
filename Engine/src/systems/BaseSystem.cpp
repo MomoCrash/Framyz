@@ -15,6 +15,8 @@ void BaseSystem::create() {
     Created = true;
 }
 
+void BaseSystem::draw() {}
+
 void BaseSystem::fixedUpdate() {}
 
 void BaseSystem::destroy() {}

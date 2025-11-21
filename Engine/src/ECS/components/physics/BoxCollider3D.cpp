@@ -3,7 +3,7 @@
 #include "BoxCollider3D.h"
 
 #include "../../../GameManager.h"
-#include "../../../systems/PhysicSystem.h"
+#include "../../../systems/physics/PhysicSystem.h"
 #include "../../../EntityFactory.h"
 
 

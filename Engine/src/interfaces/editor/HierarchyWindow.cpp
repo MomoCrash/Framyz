@@ -4,11 +4,17 @@
 #include "../../systems/EditorSystem.h"
 #include "../../EntityFactory.h"
 
-HierarchyWindow::HierarchyWindow(EditorSystem *editor) {
+HierarchyWindow::HierarchyWindow() {
     
-    m_editorSystem = editor;
+    m_editorSystem  = GameManager::GetSystem<EditorSystem>();
     m_entityManager = &GameManager::GetEntityManager();
     
+}
+
+void HierarchyWindow::clear() {
+}
+
+void HierarchyWindow::create() {
 }
 
 void HierarchyWindow::open() {
@@ -25,14 +31,14 @@ void HierarchyWindow::draw() {
         Entity* entity = EntityFactory::CreateEntity();
         EntityFactory::AttachComponent(ComponentType::MeshRenderer, entity);
         
-        m_editorSystem->getInspector()->setInspectedObject(entity);
+        m_editorSystem->getWindowByType<InspectorWindow>()->setInspectedObject(entity);
     }
     
     for (int i = 0; i < m_entityManager->getEntityCount(); i++) {
         Entity* entity = m_entityManager->getEntity(i);
         if (entity->isDebugOnly()) continue;
         if (ImGui::Button(std::to_string(i).c_str(), ImVec2(ImGui::GetWindowWidth()/4, 20))) {
-            m_editorSystem->getInspector()->setInspectedObject(entity);
+            m_editorSystem->getWindowByType<InspectorWindow>()->setInspectedObject(entity);
         }
         ImGui::Spacing();
     }

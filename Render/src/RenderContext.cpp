@@ -15,8 +15,12 @@ RenderContext::RenderContext(VkSurfaceKHR& surface)
 
 RenderContext::~RenderContext()
 {
-    
-    vkDestroyCommandPool(RenderDevice::getInstance()->getDevice(), m_commandPool, nullptr);
+    if (m_commandPool != VK_NULL_HANDLE) {
+        vkDestroyCommandPool(RenderDevice::getInstance()->getDevice(), m_commandPool, nullptr);
+        m_commandPool = VK_NULL_HANDLE;
+    }
+
+    m_commandBuffers.clear();
 
 }
 

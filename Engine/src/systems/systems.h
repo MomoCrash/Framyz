@@ -5,7 +5,7 @@
 
 #include "BaseSystem.h"
 
-#include "PhysicSystem.h"
+#include "physics/PhysicSystem.h"
 
 #ifdef FRAMYZ_EDITOR
 #include "EditorSystem.h"

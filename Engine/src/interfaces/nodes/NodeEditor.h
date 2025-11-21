@@ -16,7 +16,9 @@ struct NodeEditor : ImFlow::BaseNode, IEditorWindow
     bool m_isOpen = false;
     
     NodeEditor(GuiHandler* handler);
-    ~NodeEditor();
+
+    void create() override;
+    void clear() override;
 
     void open() override;
     void close() override;

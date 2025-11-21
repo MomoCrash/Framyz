@@ -39,21 +39,21 @@ public:
     
 private:
     
-    VkPipelineCache m_pipelineCache{ VK_NULL_HANDLE };
-    VkPipelineLayout m_pipelineLayout { VK_NULL_HANDLE };
-    VkPipeline m_graphicsPipeline{ VK_NULL_HANDLE };
+    VkPipelineCache                 m_pipelineCache{ VK_NULL_HANDLE };
+    VkPipelineLayout                m_pipelineLayout { VK_NULL_HANDLE };
+    VkPipeline                      m_graphicsPipeline{ VK_NULL_HANDLE };
 
-    VkDescriptorPool m_descriptorPool{ VK_NULL_HANDLE };
-    VkDescriptorSetLayout m_descriptorSetLayout{ VK_NULL_HANDLE };
-    std::vector<VkDescriptorSet> m_descriptorSets{ VK_NULL_HANDLE };
+    VkDescriptorPool                m_descriptorPool{ VK_NULL_HANDLE };
+    VkDescriptorSetLayout           m_descriptorSetLayout{ VK_NULL_HANDLE };
+    std::vector<VkDescriptorSet>    m_descriptorSets{ VK_NULL_HANDLE };
 
-    std::vector<VkBuffer>		m_uniformBuffers;
-    std::vector<VkDeviceMemory> m_uniformBuffersMemory;
-    std::vector<void*>			m_uniformBuffersMapped;
+    std::vector<VkBuffer>		    m_uniformBuffers;
+    std::vector<VkDeviceMemory>     m_uniformBuffersMemory;
+    std::vector<void*>			    m_uniformBuffersMapped;
 
-    std::vector<VkBuffer>		m_dynamicUniformBuffers;
-    std::vector<VkDeviceMemory> m_dynamicUniformBuffersMemory;
-    std::vector<void*>			m_dynamicUniformBuffersMapped;
+    std::vector<VkBuffer>		    m_dynamicUniformBuffers;
+    std::vector<VkDeviceMemory>     m_dynamicUniformBuffersMemory;
+    std::vector<void*>			    m_dynamicUniformBuffersMapped;
 
     void createDescriptorPool();
     void createDescriptorSets(Texture& texture, Sampler& sampler);

@@ -17,5 +17,6 @@ int main() {
 #endif
 
     GameManager::Run();
+    GameManager::Destroy();
     return 0;
 }

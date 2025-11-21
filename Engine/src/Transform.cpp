@@ -42,6 +42,8 @@ glm::vec3 Transform::down()
     return m_up * -1.0f;
 }
 
+//========== Local Transform ==========//
+
 void Transform::setLocalPosition(glm::vec3 const& position)
 {
     m_localPosition = position;
@@ -74,6 +76,10 @@ glm::vec3 & Transform::getLocalRotation()
     return m_localRotation;
 }
 
+glm::vec3 & Transform::getLocalScale() {
+    return m_localScale;
+}
+
 void Transform::rotateLocalYPR(glm::vec3 const& rotation)
 {
 
@@ -83,6 +89,8 @@ void Transform::rotateLocalYPR(glm::vec3 const& rotation)
     m_isDirty = true;
     
 }
+
+//========== World Transform ==========//
 
 void Transform::setWorldPosition(glm::vec3 const &position)
 {
@@ -121,6 +129,10 @@ glm::vec3 & Transform::getWorldRotation() {
     return m_rotation;
 }
 
+glm::vec3 & Transform::getWorldScale() {
+    return m_scale;
+}
+
 void Transform::setDirty() {
     m_isDirty = true;
 }
@@ -153,14 +165,16 @@ void Transform::update()
 
     // Model = T_world * R_world * T_local * R_local * Scale
     m_matrix = glm::mat4(1.0f);
+    // m_matrix *= m_rotationMatrix;
+    // m_matrix = translate(m_matrix, m_position);
 
-    m_matrix = translate(m_matrix, m_position);
-    m_matrix *= m_rotationMatrix;
-    
     m_matrix = translate(m_matrix, m_localPosition);
     m_matrix *= m_localRotationMatrix;
+    m_matrix = scale(m_matrix, m_localScale);
 
-    m_matrix = scale(m_matrix, m_localScale * m_scale);
+    m_matrix = translate(m_matrix, m_position);
+    m_matrix *= m_worldRotationMatrix;
+    m_matrix = scale(m_matrix, m_scale);
     
 }
 
@@ -170,6 +184,7 @@ void Transform::reset()
     m_position          = glm::vec3(0.0f);
     m_localPosition     = glm::vec3(0.0f);
     m_rotation          = glm::vec3(0.0f);
+    m_localRotation     = glm::vec3(0.0f);
     m_localScale        = glm::vec3(1.0f);
     m_scale             = glm::vec3(1.0f);
     
@@ -178,6 +193,7 @@ void Transform::reset()
     m_forward           = glm::vec3( 0.0f, 0.0f, 1.0f );
 
     m_localRotationMatrix = glm::mat4(1.0f);
+    m_worldRotationMatrix = glm::mat4(1.0f);
     m_rotationMatrix      = glm::mat4(1.0f);
 
     m_isDirty = true;

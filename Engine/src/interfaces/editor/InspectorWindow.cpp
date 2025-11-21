@@ -6,10 +6,6 @@
 
 InspectorWindow::InspectorWindow(): m_inspectedObject(nullptr) {}
 
-InspectorWindow::~InspectorWindow()
-{
-}
-
 void InspectorWindow::setInspectedObject(Entity* entity)
 {
     m_inspectedObject = entity;
@@ -33,6 +29,16 @@ void InspectorWindow::updateParameters()
     m_rotation[0] = &m_inspectedObject->getLocalRotation().x;
     m_rotation[1] = &m_inspectedObject->getLocalRotation().y;
     m_rotation[2] = &m_inspectedObject->getLocalRotation().z;
+
+    m_scale[0] = &m_inspectedObject->getLocalScale().x;
+    m_scale[1] = &m_inspectedObject->getLocalScale().y;
+    m_scale[2] = &m_inspectedObject->getLocalScale().z;
+}
+
+void InspectorWindow::create() {
+}
+
+void InspectorWindow::clear() {
 }
 
 void InspectorWindow::draw()
@@ -40,21 +46,19 @@ void InspectorWindow::draw()
 
     if (m_inspectedObject == nullptr) return;
     if (!m_inspectedObject->isCreated()) return;
-
+    
     ImGui::Begin("Object Inspector");
-
+    
     static bool hasSelected = false;
     static const char* current_item = "Create new Component";
     static OptionsComponent selectedComponent {-1};
-    ImGuiComboFlags flags = ImGuiComboFlags_NoArrowButton;
     
     ImGuiStyle& style = ImGui::GetStyle();
 
     float w = ImGui::CalcItemWidth();
     float spacing = style.ItemInnerSpacing.x;
-    float button_sz = ImGui::GetFrameHeight();
     
-    ImGui::PushItemWidth(w - spacing * 2.0f - button_sz * 2.0f);
+    ImGui::PushItemWidth(w - spacing * 2.0f);
     if (ImGui::BeginCombo("##custom combo", current_item, ImGuiComboFlags_NoArrowButton))
     {
 
@@ -72,7 +76,7 @@ void InspectorWindow::draw()
     }
 
     if (hasSelected) {
-        ImGui::SameLine(0, 10);
+        ImGui::SameLine(0, 10 );
         if (ImGui::Button("Create")) {
 
             EntityFactory::AttachComponent(static_cast<ComponentType>(selectedComponent.Id), m_inspectedObject);
@@ -86,18 +90,23 @@ void InspectorWindow::draw()
     if (ImGui::DragFloat3("Position", *m_position, 0.1)) {
         m_inspectedObject->setDirty();
     }
+    ImGui::SameLine(ImGui::GetWindowWidth() - ImGui::CalcItemWidth()/6, 0);
+    if (ImGui::Button("Reset")) {
+        m_inspectedObject->reset();
+    }
     if (ImGui::DragFloat3("Rotation", *m_rotation, 0.1)) {
         m_inspectedObject->setDirty();
         m_inspectedObject->updateRotation();
     }
-
+    if (ImGui::DragFloat3("Scale", *m_scale, 0.1)) {
+        m_inspectedObject->setDirty();
+    }
     
     for (auto component : m_inspectedObject->getComponents()) {
         component->EDITOR_Display();
     }
     
     ImGui::End();
-    
 }
 
 void InspectorWindow::close() {

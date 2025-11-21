@@ -56,6 +56,7 @@ public:
     void        rotateLocalYPR(glm::vec3 const&rotation);
     glm::vec3&  getLocalPosition();
     glm::vec3&  getLocalRotation();
+    glm::vec3&  getLocalScale();
 
     //==== World Transform
     void        setWorldPosition(glm::vec3 const& position);
@@ -65,8 +66,9 @@ public:
     void        rotateWorldYPR(glm::vec3 const&rotation);
     glm::vec3&  getWorldPosition();
     glm::vec3&  getWorldRotation();
+    glm::vec3&  getWorldScale();
 
-    
+
     void        setDirty();
     void        updateRotation();
     void        update();

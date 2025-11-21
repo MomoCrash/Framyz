@@ -7,11 +7,20 @@
 
 RenderSystem::RenderSystem() : Window(nullptr), DefaultPipeline(nullptr),
                                DefaultTexture(nullptr),
-                               DefaultSampler(nullptr),
-                               OutTexture(nullptr) {
+                               DefaultSampler(nullptr) {
 }
 
 RenderSystem::~RenderSystem() {
+    
+    for (auto& [Layer, Targets] : RenderTargets)
+        delete Targets;
+    RenderTargets.clear();
+    
+    delete Window;
+
+    delete DefaultPipeline;
+    delete DefaultSampler;
+    delete DefaultTexture;
     
 }
 
@@ -36,33 +45,25 @@ void RenderSystem::create() {
     DefaultSampler = new Sampler();
     
     DefaultPipeline = new RenderPipeline(*DefaultTexture, *DefaultSampler, Window->getRenderTarget(), { &sFragment, &sVertex});
-
-#ifdef FRAMYZ_EDITOR
-    VkFormat format = RenderDevice::getInstance()->findSupportedFormat( { VK_FORMAT_B8G8R8A8_SRGB  },
-        VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT );
-    
-    OutTexture = new RenderTarget(format, 1920, 1080);
-    OutTexture->setRenderContext(&Window->getRenderContext());
-#endif
     
 }
 
 void RenderSystem::update() {
 
     if (Window->shouldClose()) {
-        GameManager::Shutdown();
+        Window->flushCommand();
+        vkDeviceWaitIdle(RenderDevice::getInstance()->getDevice());
+        GameManager::Destroy();
         return;
     }
 
     Window->beginFrame();
 
-#ifdef FRAMYZ_EDITOR
-    OutTexture->beginDraw();
-#else
-    Window->beginDraw();
-#endif
+    for (auto& [Layer, Targets] : RenderTargets)
+        Targets->beginDraw();
     
     Window->update(m_currentCamera);
+    DefaultPipeline->Update(Window->GetGlobalBuffer(), Window->getRenderContext().getCurrentFrame());
     
     for (int i = 0; i < m_manager->getEntityCount(); i++) {
         
@@ -72,16 +73,36 @@ void RenderSystem::update() {
         
     }
 
-    DefaultPipeline->Update(Window->GetGlobalBuffer(), Window->getRenderContext().getCurrentFrame());
+    /////////////////////////////////////////////////////////////////////////////////////
+    ////////A FINIR T4ES EN TRAIN DE FAIRE LE SYSTEM DE MULTI RENDU               /////////
+    ////////A FINIR T4ES EN TRAIN DE FAIRE LE SYSTEM DE MULTI RENDU               /////////
+    ////////A FINIR T4ES EN TRAIN DE FAIRE LE SYSTEM DE MULTI RENDU               /////////
+    ////////A FINIR T4ES EN TRAIN DE FAIRE LE SYSTEM DE MULTI RENDU               /////////
+    ////////A FINIR T4ES EN TRAIN DE FAIRE LE SYSTEM DE MULTI RENDU               /////////
+    /////////////////////////////////////////////////////////////////////////////////////
 
+    for (auto& [Layer, Targets] : RenderTargets)
+        Targets->endDraw();
 
-#ifdef FRAMYZ_EDITOR
-    OutTexture->endDraw();
-#else
+    Window->beginDraw();
+    for (auto& system : GameManager::GetSystems())
+        if (system->Created) system->draw();
     Window->endDraw();
-    Window->display();
-#endif
     
+    Window->display();
+}
+
+bool RenderSystem::CreateRenderLayer(SceneWindow::Layers layer, ImageLayoutType layout, RenderTarget** out) {
+    if (RenderTargets.contains(layer)) return false;
+    
+    VkFormat format = RenderDevice::getInstance()->findSupportedFormat( { VK_FORMAT_B8G8R8A8_SRGB  },
+VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT );
+    
+    *out = new RenderTarget(format, 1920, 1080, layout);
+    (*out)->setRenderContext(&Window->getRenderContext());
+
+    RenderTargets.emplace(layer, (*out));
+    return true;
 }
 
 void RenderSystem::updateAsMeshRenderer(Entity* entity) const {
@@ -89,7 +110,7 @@ void RenderSystem::updateAsMeshRenderer(Entity* entity) const {
     if (MeshRenderer* meshRenderer = m_manager->getComponent<MeshRenderer>(entity)) {
             
 #ifdef FRAMYZ_EDITOR
-        OutTexture->drawObject(*DefaultPipeline, *meshRenderer->Object);
+        RenderTargets.at(SceneWindow::Layers::LAYER_SCENE)->drawObject(*DefaultPipeline, *meshRenderer->Object);
 #else
         Window->drawObject(*DefaultPipeline, *meshRenderer->Object);
 #endif

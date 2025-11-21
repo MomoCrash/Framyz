@@ -10,7 +10,7 @@ COMPONENT_DECLARE( BoxCollider3D, Component ), public Collider3D
 {
     BoxCollider3D();
 
-    glm::vec3 Extend = glm::vec3(1.0f, 1.0f, 1.0f);
+    glm::vec3 Extend = glm::vec3(0.5f, 0.5f, 0.5f);
 
     void EDITOR_Display() override;
     void instantiate() override;

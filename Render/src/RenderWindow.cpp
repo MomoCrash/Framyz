@@ -54,11 +54,11 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
 RenderWindow::~RenderWindow()
 {
 
+    delete m_renderContext;
     delete m_renderTarget;
 
     cleanupSwapChain();
     
-
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         
         vkDestroySemaphore(*m_device, m_renderFinishedSemaphores[i], nullptr);
@@ -79,9 +79,9 @@ void RenderWindow::createSwapChain()
 {
     SwapChainSupportDetails swapChainSupport = RenderDevice::getInstance()->querySwapChainSupport(RenderDevice::getInstance()->getPhysicalDevice(), m_surface);
 
-    VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
-    VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-    VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+    VkSurfaceFormatKHR surfaceFormat    = chooseSwapSurfaceFormat(swapChainSupport.formats);
+    VkPresentModeKHR presentMode        = chooseSwapPresentMode(swapChainSupport.presentModes);
+    VkExtent2D extent                   = chooseSwapExtent(swapChainSupport.capabilities);
 
     m_swapChainImageFormat = surfaceFormat.format;
     m_swapChainExtent = extent;

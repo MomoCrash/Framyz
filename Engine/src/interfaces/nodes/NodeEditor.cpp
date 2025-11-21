@@ -8,8 +8,10 @@ NodeEditor::NodeEditor(GuiHandler* handler)
     contextGuiHandlers = handler;
 }
 
-NodeEditor::~NodeEditor()
-{
+void NodeEditor::create() {
+}
+
+void NodeEditor::clear() {
     if (window != nullptr)
         delete window;
 }
@@ -75,7 +77,6 @@ void NodeEditor::draw()
         window = nullptr;
         contextGuiHandlers->setContext(0);
         contextGuiHandlers->remove(index);
-        
     }
         
 }

@@ -9,14 +9,25 @@
 
 struct RenderSystem;
 
-class SceneWindow : IEditorWindow {
+class SceneWindow : public IEditorWindow {
+
+public:
+    enum Layers : int{
+        LAYER_SCENE,
+        LAYER_PHYSICS,
+
+        SIZE,
+    };
 
 public:
     SceneWindow();
-    ~SceneWindow();
+    ~SceneWindow() = default;
     
     void setRenderWindow(RenderSystem* renderWindow);
-    void setRenderImage(VkImageView image, uint32_t index);
+    void addViewLayer(Layers layer, std::vector<VkImageView> const& image);
+
+    void create() override;
+    void clear() override;
 
     void open() override;
     void close() override;
@@ -24,8 +35,10 @@ public:
     
 
 private:
-    VkDescriptorSet m_renderedImages[RenderWindow::MAX_FRAMES_IN_FLIGHT];
     
+    std::map<Layers, std::vector<VkDescriptorSet>> m_renderedImages;
+
+    RenderTarget* m_sceneOutputTexture;
     RenderSystem* m_renderWindow;
     CameraInformation m_cameraInfo;
     

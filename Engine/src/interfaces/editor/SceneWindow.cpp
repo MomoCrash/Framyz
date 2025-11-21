@@ -7,10 +7,8 @@
 
 #include "../../EntityFactory.h"
 
-SceneWindow::SceneWindow() : m_renderedImages(), m_renderWindow(nullptr) {
+SceneWindow::SceneWindow() : m_renderedImages(), m_renderWindow(nullptr), m_camera(nullptr) {
 }
-
-SceneWindow::~SceneWindow() {}
 
 /**
  * Set the scene render
@@ -25,8 +23,34 @@ void SceneWindow::setRenderWindow(RenderSystem *renderWindow) {
  * @param image image index
  * @param index index in swapchain
  */
-void SceneWindow::setRenderImage(VkImageView image, uint32_t index) {
-    m_renderedImages[index] = ImGui_ImplVulkan_AddTexture(m_renderWindow->DefaultSampler->getSampler(), image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+void SceneWindow::addViewLayer(Layers layer, std::vector<VkImageView> const& images) {
+
+    if (!m_renderedImages.contains(layer)) {
+        m_renderedImages[layer] = std::vector<VkDescriptorSet>();
+    }
+    
+    for (VkImageView const& image : images)
+        m_renderedImages[layer].push_back(ImGui_ImplVulkan_AddTexture(m_renderWindow->DefaultSampler->getSampler(), image, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL));
+}
+
+void SceneWindow::create() {
+    
+    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_SCENE, IMAGE_LAYOUT_READ_ONLY_OPTIMAL, &m_sceneOutputTexture);
+    addViewLayer(SceneWindow::LAYER_SCENE, m_sceneOutputTexture->getImages());
+    
+}
+
+void SceneWindow::clear() {
+    // Parcourir toutes les layers
+    for (auto& [layer, descriptorSets] : m_renderedImages) {
+        // Parcourir tous les descriptors de cette layer
+        for (VkDescriptorSet set : descriptorSets) {
+            // Cette fonction libère le DescriptorSet créé par ImGui
+            ImGui_ImplVulkan_RemoveTexture(set); 
+        }
+        descriptorSets.clear();
+    }
+    m_renderedImages.clear();
 }
 
 void SceneWindow::open() {
@@ -89,8 +113,13 @@ void SceneWindow::draw() {
     
     ImVec2 size = ImGui::GetWindowSize();
     m_camera->AspectRatio = size.x / size.y;
-        
-    ImGui::Image((ImTextureID)m_renderedImages[m_renderWindow->Window->getRenderContext().getCurrentFrame()], ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
+
+    for (int i = 0; i < Layers::SIZE; i++) {
+        for (VkDescriptorSet imGuiDescriptor : m_renderedImages[static_cast<Layers>(i)]) {
+            ImGui::Image((ImTextureID)imGuiDescriptor,
+                ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
+        }
+    }
     ImGui::End();
     
 }

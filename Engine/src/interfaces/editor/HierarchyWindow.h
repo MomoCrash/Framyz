@@ -5,9 +5,12 @@
 struct EditorSystem;
 class EntityManager;
 
-class HierarchyWindow final : IEditorWindow {
+class HierarchyWindow final : public IEditorWindow {
 public:
-    explicit HierarchyWindow(EditorSystem* editor);
+    explicit HierarchyWindow();
+
+    void create() override;
+    void clear() override;
 
     void open() override;
     void close() override;

@@ -2,10 +2,10 @@
 
 #include "PhysicSystem.h"
 
-#include "../GameManager.h"
-#include "../ECS/components/physics/BoxCollider3D.h"
-#include "../ECS/components/physics/Rigidbody3D.h"
-#include "../ECS/components/physics/SphereCollider3D.h"
+#include "../../GameManager.h"
+#include "../../ECS/components/physics/BoxCollider3D.h"
+#include "../../ECS/components/physics/Rigidbody3D.h"
+#include "../../ECS/components/physics/SphereCollider3D.h"
 
 PhysicSystem::PhysicSystem() : m_physicsSystem(nullptr), m_broadPhaseLayer(nullptr), m_objVsBroadPhaseFilter(nullptr),
                                m_objVsObjFilter(nullptr), m_tempAllocator(nullptr), m_jobSystem(nullptr) {
@@ -13,7 +13,9 @@ PhysicSystem::PhysicSystem() : m_physicsSystem(nullptr), m_broadPhaseLayer(nullp
 
 PhysicSystem::~PhysicSystem() = default;
 
-void PhysicSystem::update() {}
+void PhysicSystem::update() {
+	
+}
 
 void PhysicSystem::create() {
 	BaseSystem::create();
@@ -131,9 +133,6 @@ void PhysicSystem::fixedUpdate() {
 			if (!body->IsValid) continue;
 			
 			RVec3 position = body_interface.GetCenterOfMassPosition(body->BodyID);
-			Vec3 velocity = body_interface.GetLinearVelocity(body->BodyID);
-			cout << "Entity " << i << ": Position = (" << position.GetX() << ", " << position.GetY() << ", " << position.GetZ() << "), Velocity = (" << velocity.GetX() << ", " << velocity.GetY() << ", " << velocity.GetZ() << ")" << endl;
-
 			body->GetOwner()->setLocalPosition(position.GetX(), position.GetY(), position.GetZ());
 		}
 		
@@ -188,9 +187,9 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 		Transform& componentTransform = component->GetOwner()->getTransform();
 		BodyCreationSettings sphereCollider(new SphereShape(0.5f),
 				RVec3(componentTransform.getLocalPosition().x,
-						componentTransform.getLocalPosition().y,
-						componentTransform.getLocalPosition().z), Quat::sIdentity(),
-						JPH::EMotionType::Dynamic, collider->Layer);
+								componentTransform.getLocalPosition().y,
+								componentTransform.getLocalPosition().z), Quat::sIdentity(),
+						JPH::EMotionType::Dynamic, Layers::MOVING);
 		// Create the actual rigid body
 		collider->BodySettings = body_interface.CreateBody(sphereCollider); // Note that if we run out of bodies this can return nullptr
 		// Add it to the world

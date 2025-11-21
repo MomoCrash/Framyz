@@ -5,7 +5,7 @@
 #include "RenderObject.h"
 #include "RenderWindow.h"
 
-RenderTarget::RenderTarget(VkFormat format, int width, int height)
+RenderTarget::RenderTarget(VkFormat format, int width, int height, ImageLayoutType type)
 {
 
     m_globalBuffer.proj = glm::mat4(1.0f);
@@ -17,6 +17,7 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height)
     assert(m_perObjectBuffer.model);
 
     m_format = format;
+    m_imageType = static_cast<VkImageLayout>(type);
     m_extent = VkExtent2D( width, height );
     m_offset = VkOffset2D( 0, 0 );
 
@@ -27,9 +28,23 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height)
 
 RenderTarget::~RenderTarget()
 {
-    
-    vkDestroyRenderPass(RenderDevice::getInstance()->getDevice(), m_renderPass, nullptr);
+    VkDevice const & device = RenderDevice::getInstance()->getDevice();
 
+    
+    for (auto& image : m_images) 
+        vkDestroyImage(device, image, nullptr);
+
+    for (auto view : m_imageViews)
+        vkDestroyImageView(device, view, nullptr);
+
+    for (auto framebuffer : m_framebuffers)
+        vkDestroyFramebuffer(device, framebuffer, nullptr);
+
+    for (auto imagesMemory : m_imagesMemory)
+        vkFreeMemory(device, imagesMemory, nullptr);
+    
+    vkDestroyRenderPass(device, m_renderPass, nullptr);
+    
 }
 
 ////////////////////////// RENDER OPERATIONS //////////////////////////////////////
@@ -99,7 +114,7 @@ void RenderTarget::drawObject(RenderPipeline& pipeline, RenderObject& object)
 void RenderTarget::endDraw()
 {
     VkCommandBuffer& commandBuffer = m_renderContext->getCommandBuffer();
-
+    
     vkCmdEndRenderPass(commandBuffer);
     
 }
@@ -124,6 +139,10 @@ RenderContext& RenderTarget::getRenderContext()
 VkImageView& RenderTarget::getImage(glm::uint32 frame)
 {
     return m_imageViews[frame];
+}
+
+std::vector<VkImageView> const & RenderTarget::getImages() {
+    return m_imageViews;
 }
 
 ////////////////////////// CONTEXT CREATION //////////////////////////////////////
@@ -154,13 +173,13 @@ void RenderTarget::createRenderPass()
     
     VkAttachmentDescription colorAttachment{};
     colorAttachment.format = m_format;
-    colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-    colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-    colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-    colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-    colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-    colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    colorAttachment.samples         = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.loadOp          = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    colorAttachment.storeOp         = VK_ATTACHMENT_STORE_OP_STORE;
+    colorAttachment.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    colorAttachment.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    colorAttachment.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
+    colorAttachment.finalLayout     = m_imageType;
 
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;

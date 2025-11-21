@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../../../framework.h"
-#include "../../../systems/PhysicSystem.h"
+#include "../../../systems/physics/PhysicSystem.h"
 #include "../ComponentBase.h"
 
 struct Collider3D {

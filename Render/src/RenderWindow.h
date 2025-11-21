@@ -62,6 +62,8 @@ public:
 	void display();
 
 	bool shouldClose();
+	
+	uint32_t flushCommand();
 
 protected:
 	// Reference to device
@@ -79,7 +81,6 @@ protected:
 
 	UniformBufferObject m_globalBuffer;
 	UboDataDynamic m_perObjectBuffer;
-
 	
 	// Swapchain datas
 	VkSwapchainKHR m_swapchain;
@@ -117,6 +118,5 @@ protected:
 	VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
 	void cleanupSwapChain();
-	uint32_t flushCommand();
 
 };

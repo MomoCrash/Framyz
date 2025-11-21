@@ -15,25 +15,30 @@ class GameManager {
 
 public:
     GameManager();
-    ~GameManager() = default;
+    ~GameManager();
 
     static GameManager& GetInstance();
 
-    static void     Run();
+    static void Create();
+    static void Destroy();
+    
+    static void                 Run();
     
     template <typename System>
-    static  System* AddSystem();
+    static  System*             AddSystem();
 
     template <typename System>
-    static  System* GetSystem();
+    static  System*             GetSystem();
     
     static  std::vector<BaseSystem*> const& GetSystems();
     
-    static  void    Shutdown();
+    static  void                Shutdown();
     
-    static  Clock   GetClock();
+    static  Clock               GetClock();
 
 private:
+    static EntityManager&       GetEntityManager();
+    
     EntityManager               m_gameManager;
     std::vector<BaseSystem*>    m_systems;
     Clock                       m_clock;
@@ -42,8 +47,6 @@ private:
     int                         m_mask;
     
     float                       m_accumulator;
-    
-    static EntityManager& GetEntityManager();
 
 #ifdef FRAMYZ_EDITOR
     friend HierarchyWindow;

@@ -3,8 +3,8 @@
 #ifndef PHYSICSYSTEM_H
 #define PHYSICSYSTEM_H
 
-#include "BaseSystem.h"
-#include "../framework.h"
+#include "../BaseSystem.h"
+#include "../../framework.h"
 
 #include <Jolt/Jolt.h>
 
@@ -18,6 +18,8 @@
 #include <Jolt/Physics/Collision/Shape/SphereShape.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
+
+#include "PhysicDebugLayer.h"
 
 using namespace JPH;
 using namespace JPH::literals;
@@ -216,6 +218,7 @@ protected:
 
 	MyBodyActivationListener    		*m_activationListener;
 	MyContactListener           		*m_contactListener;
+	PhysicDebugLayer					*m_debugLayer;
 
 	TempAllocatorImpl					*m_tempAllocator;
 	JobSystemThreadPool					*m_jobSystem;
