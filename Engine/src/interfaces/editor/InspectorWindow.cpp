@@ -59,7 +59,7 @@ void InspectorWindow::draw()
     float spacing = style.ItemInnerSpacing.x;
     
     ImGui::PushItemWidth(w - spacing * 2.0f);
-    if (ImGui::BeginCombo("##custom combo", current_item, ImGuiComboFlags_NoArrowButton))
+    if (ImGui::BeginCombo("##components", current_item, ImGuiComboFlags_NoArrowButton))
     {
 
         for (int i = 0; i < m_options.size(); i++) {

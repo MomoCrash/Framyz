@@ -15,7 +15,10 @@ void BaseSystem::create() {
     Created = true;
 }
 
-void BaseSystem::draw() {}
+void BaseSystem::drawRenderTarget(SceneWindow::SceneLayers layer, RenderTarget *target) {
+}
+
+void BaseSystem::drawWindow() {}
 
 void BaseSystem::fixedUpdate() {}
 

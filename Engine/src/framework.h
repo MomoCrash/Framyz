@@ -4,6 +4,7 @@
 #define FRAMEWORK_ENGINE_H
 
 #include "render.hpp"
+#include "tools.hpp"
 
 #include <Jolt/Jolt.h>
 

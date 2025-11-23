@@ -15,16 +15,26 @@
 #include <Jolt/Math/Math.h>
 #include "Jolt/Math/Real.h"
 
+class MeshRenderer;
+
 class PhysicDebugLayer : public JPH::DebugRendererSimple
 {
 public:
 
-	PhysicDebugLayer() {
-	}
+	PhysicDebugLayer();
+	~PhysicDebugLayer() override;
 	
 	virtual void DrawLine(JPH::RVec3Arg inFrom, JPH::RVec3Arg inTo, JPH::ColorArg inColor) override
 	{
-		// Implement
+		int vert1 = m_debugData.Vertices.size();
+		m_debugData.Vertices.emplace_back(inFrom.GetX(), inFrom.GetY(), inFrom.GetZ(), 0, 0, 0, 0, 0);
+		int vert2 = m_debugData.Vertices.size();
+		m_debugData.Vertices.emplace_back(inTo.GetX(), inTo.GetY(), inTo.GetZ(), 0, 0, 0, 0, 0);
+
+		m_debugData.Indices.emplace_back(vert1);
+		m_debugData.Indices.emplace_back(vert2);
+		m_debugData.Indices.emplace_back(vert1);
+
 	}
 
 	virtual void DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor, ECastShadow inCastShadow) override
@@ -36,4 +46,16 @@ public:
 	{
 		// Implement
 	}
+
+	void Update(RenderTarget* target);
+	void Clear();
+
+	
+
+private:
+	MeshData		m_debugData;
+	Mesh*			m_debugMesh;
+	MeshRenderer*	m_debugRenderer;
+
+	RenderPipeline*	m_debugPipeline;
 };

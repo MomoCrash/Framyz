@@ -2,8 +2,6 @@
 
 #include "ComponentBase.h"
 
-#include "MeshRenderer.h"
-
 ComponentBase::ComponentBase()
     : Mask(0), Owner(nullptr), m_active(true) {
 }

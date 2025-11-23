@@ -172,6 +172,8 @@ void RenderWindow::createDepthResources()
 {
     
     VkFormat depthFormat = RenderDevice::getInstance()->findDepthFormat();
+
+    // TODO DEPTH BUFFER
     
 }
 

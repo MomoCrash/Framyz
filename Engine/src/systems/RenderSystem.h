@@ -18,15 +18,21 @@ public:
 
     void update() override;
 
-    bool CreateRenderLayer(SceneWindow::Layers layer, ImageLayoutType layout, RenderTarget** out);
+    bool CreateRenderLayer(SceneWindow::SceneLayers layer, ImageLayoutType layout, RenderTarget** out);
+    void SetCurrentActiveLayer(SceneWindow::SceneLayers layer);
+
     void updateAsMeshRenderer(Entity* entity) const;
     void updateAsCamera(Entity* entity);
 
-    std::map<SceneWindow::Layers, RenderTarget*> RenderTargets;
+    std::map<SceneWindow::SceneLayers, RenderTarget*> RenderTargets;
+    SceneWindow::SceneLayers Layer = SceneWindow::LAYER_UNLIT;
     RenderWindow* Window;
 
-    // Other for tests
-    RenderPipeline* DefaultPipeline;
+    // Render pipeline (different render in scene : lit, unlit, wireframed......)
+    RenderPipeline* UnlitPipeline;
+    RenderPipeline* WireframePipeline;
+
+    // Default Samplers
     Texture*        DefaultTexture;
     Sampler*        DefaultSampler;
 

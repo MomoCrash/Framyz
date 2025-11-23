@@ -15,7 +15,7 @@ DECLARE_SYSTEM(EditorSystem, BaseSystem, SystemType::EDITOR_SYSTEM)
 
     void create() override;
     void update() override;
-    void draw() override;
+    void drawWindow() override;
 
     void AddRender(RenderSystem* system);
     void AttachWindow(IEditorWindow* window);

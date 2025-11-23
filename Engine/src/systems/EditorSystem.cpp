@@ -38,6 +38,7 @@ void EditorSystem::create() {
     
     SceneWindow* sceneWindow = new SceneWindow();
     sceneWindow->setRenderWindow(m_renderSystem);
+    AttachWindow(sceneWindow);
     
     m_nodeEditor = new NodeEditor(m_gui);
 
@@ -45,16 +46,14 @@ void EditorSystem::create() {
         editorWindow->create();
         editorWindow->open();
     }
-
-    m_renderSystem->CreateRenderLayer(SceneWindow::LAYER_SCENE, IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, &m_editorRender);
     
 }
 
 void EditorSystem::update() {
 }
 
-void EditorSystem::draw() {
-    BaseSystem::draw();
+void EditorSystem::drawWindow() {
+    BaseSystem::drawWindow();
 
     m_gui->setContext(m_guiIndex);
     

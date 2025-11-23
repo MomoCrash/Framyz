@@ -2,6 +2,9 @@
 
 #include "PhysicSystem.h"
 
+#include "PhysicDebugLayer.h"
+#include "../EditorSystem.h"
+#include "../RenderSystem.h"
 #include "../../GameManager.h"
 #include "../../ECS/components/physics/BoxCollider3D.h"
 #include "../../ECS/components/physics/Rigidbody3D.h"
@@ -14,6 +17,22 @@ PhysicSystem::PhysicSystem() : m_physicsSystem(nullptr), m_broadPhaseLayer(nullp
 PhysicSystem::~PhysicSystem() = default;
 
 void PhysicSystem::update() {
+	
+}
+
+void PhysicSystem::drawRenderTarget(SceneWindow::SceneLayers layer, RenderTarget *target) {
+	BaseSystem::drawRenderTarget(layer, target);
+
+	if (layer != SceneWindow::SceneLayers::LAYER_PHYSICS) return;
+	
+	m_debugLayer->Clear();
+
+	m_physicsSystem->DrawBodies(m_drawSettings,			// const BodyManager::DrawSettings &inSettings
+						   m_debugLayer,				// DebugRenderer* inRenderer
+						   nullptr						// const BodyDrawFilter* inBodyFilter = nullptr
+	);
+	
+	m_debugLayer->Update(target);
 	
 }
 
@@ -119,6 +138,20 @@ void PhysicSystem::create() {
 	// Instead insert all new objects in batches instead of 1 at a time to keep the broad phase efficient.
 	m_physicsSystem->OptimizeBroadPhase();
 	
+	RenderSystem* render = GameManager::GetSystem<RenderSystem>();
+	EditorSystem* editor = GameManager::GetSystem<EditorSystem>();
+	if (render != nullptr && editor != nullptr) {
+		m_debugLayer = new PhysicDebugLayer();
+		
+		m_drawSettings.mDrawShape = true;
+		m_drawSettings.mDrawBoundingBox = true;
+		m_drawSettings.mDrawShapeWireframe = true;
+		
+		m_useDebug = true;
+		
+	} else {
+		m_useDebug = false;
+	}
 }
 
 void PhysicSystem::fixedUpdate() {

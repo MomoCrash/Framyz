@@ -1,7 +1,7 @@
 ﻿#include "RenderObject.h"
 
 RenderObject::RenderObject(Mesh* mesh)
-    : m_transform(new glm::mat4())
+    : m_transform(nullptr)
 {
     m_mesh = mesh;
 }

@@ -19,8 +19,7 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Physics/Body/BodyActivationListener.h>
 
-#include "PhysicDebugLayer.h"
-
+class PhysicDebugLayer;
 using namespace JPH;
 using namespace JPH::literals;
 
@@ -200,6 +199,7 @@ public:
     void create() override;
 	
     void update() override;
+	void drawRenderTarget(SceneWindow::SceneLayers layer, RenderTarget *target) override;
     void fixedUpdate() override;
 
     void onComponentRegister(ComponentBase *component) override;
@@ -210,18 +210,25 @@ public:
 protected:
 
 	static constexpr int m_collisionStep = 1;
-	
+
+	//==== Physics Implementation ====//
 	PhysicsSystem						*m_physicsSystem;
 	BPLayerInterfaceImpl				*m_broadPhaseLayer;
 	ObjectVsBroadPhaseLayerFilterImpl	*m_objVsBroadPhaseFilter;
 	CollisionPairFilter					*m_objVsObjFilter;
 
+	//==== Physics Callbacks ====//
 	MyBodyActivationListener    		*m_activationListener;
 	MyContactListener           		*m_contactListener;
-	PhysicDebugLayer					*m_debugLayer;
 
+	//==== Allocators ====//
 	TempAllocatorImpl					*m_tempAllocator;
 	JobSystemThreadPool					*m_jobSystem;
+
+	//==== Debug Layer ====//
+	bool								m_useDebug = false;
+	BodyManager::DrawSettings			m_drawSettings;
+	PhysicDebugLayer					*m_debugLayer;
 	
 };
 

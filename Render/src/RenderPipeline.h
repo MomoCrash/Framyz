@@ -17,13 +17,21 @@ struct UboDataDynamic {
     glm::mat4* model{ nullptr };
 };
 
+typedef enum PolygonMode {
+    POLYGON_MODE_FILL = 0,
+    POLYGON_MODE_LINE = 1,
+    POLYGON_MODE_POINT = 2,
+    POLYGON_MODE_FILL_RECTANGLE_NV = 1000153000,
+    POLYGON_MODE_MAX_ENUM = 0x7FFFFFFF
+} PolygonMode;
+
 class RenderPipeline
 {
 public:
 
     static const int MAX_OBJECT_RENDERER = 150;
-
-    RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget& target, std::vector<Shader*> shaders);
+    
+    RenderPipeline(Texture& texture, Sampler& sampler, RenderTarget& target, PolygonMode mode, std::vector<Shader*> shaders);
     ~RenderPipeline();
 
     VkPipeline& getGraphicsPipeline();

@@ -15,7 +15,6 @@ public:
     ~RenderObject();
     
     [[nodiscard]] Mesh const* getMesh() const;
-
     [[nodiscard]] glm::mat4 const& getTransform() const;
 
     void setMesh(Mesh* mesh);

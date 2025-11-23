@@ -12,7 +12,7 @@ COMPONENT_DECLARE( MeshRenderer, Component )
     void EDITOR_Display() override;
     void instantiate() override;
 
-    RenderObject* Object;
+    RenderObject* Object = nullptr;
 };
 
 

@@ -23,10 +23,10 @@ void SceneWindow::setRenderWindow(RenderSystem *renderWindow) {
  * @param image image index
  * @param index index in swapchain
  */
-void SceneWindow::addViewLayer(Layers layer, std::vector<VkImageView> const& images) {
+void SceneWindow::addViewLayer(SceneLayers layer, std::vector<VkImageView> const& images) {
 
     if (!m_renderedImages.contains(layer)) {
-        m_renderedImages[layer] = std::vector<VkDescriptorSet>();
+        m_renderedImages.emplace(layer, std::vector<VkDescriptorSet>());
     }
     
     for (VkImageView const& image : images)
@@ -35,8 +35,13 @@ void SceneWindow::addViewLayer(Layers layer, std::vector<VkImageView> const& ima
 
 void SceneWindow::create() {
     
-    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_SCENE, IMAGE_LAYOUT_READ_ONLY_OPTIMAL, &m_sceneOutputTexture);
-    addViewLayer(SceneWindow::LAYER_SCENE, m_sceneOutputTexture->getImages());
+    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_UNLIT,     IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneUnlitTexture);
+    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_WIREFRAME, IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneWireframeTexture);
+    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_PHYSICS,   IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_physicsTexture);
+
+    addViewLayer(SceneWindow::LAYER_UNLIT,      m_sceneUnlitTexture->getImages());
+    addViewLayer(SceneWindow::LAYER_WIREFRAME,  m_sceneWireframeTexture->getImages());
+    addViewLayer(SceneWindow::LAYER_PHYSICS,    m_physicsTexture->getImages());
     
 }
 
@@ -108,14 +113,39 @@ void SceneWindow::draw() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
         
     ImGui::Begin("Image", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
-
     ImGui::PopStyleVar();
+
+    static bool hasSelected = false;
+    static const char* current_item = "View 0";
+    static SceneLayers selectedComponent { LAYER_UNLIT };
     
-    ImVec2 size = ImGui::GetWindowSize();
+    ImGui::PushItemWidth(100.f);
+    if (ImGui::BeginCombo("##view layer", current_item, ImGuiComboFlags_NoArrowButton))
+    {
+
+        for (int i = 0; i < SceneLayers::LAYER_COUNT; i++) {
+            SceneLayers layer = static_cast<SceneLayers>(1 << i);
+            bool is_selected = (selectedComponent == layer);
+            if (ImGui::Selectable(("View mode " + std::to_string(i)).c_str(), is_selected)) {
+                current_item = "View";
+                selectedComponent = layer;
+                m_displayedLayer = layer;
+                m_renderWindow->SetCurrentActiveLayer(layer);
+            }
+            if (is_selected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+    }
+    
+    ImVec2 size = ImGui::GetContentRegionAvail();
     m_camera->AspectRatio = size.x / size.y;
 
-    for (int i = 0; i < Layers::SIZE; i++) {
-        for (VkDescriptorSet imGuiDescriptor : m_renderedImages[static_cast<Layers>(i)]) {
+    for (int i = 0; i < SceneLayers::LAYER_COUNT; i++) {
+        SceneLayers layerType = static_cast<SceneLayers>(1 << i);
+        if (!m_renderedImages.contains(layerType)) continue;
+        if (!(layerType & m_displayedLayer)) continue;
+        for (VkDescriptorSet imGuiDescriptor : m_renderedImages[layerType]) {
             ImGui::Image((ImTextureID)imGuiDescriptor,
                 ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
         }

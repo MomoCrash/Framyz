@@ -12,19 +12,21 @@ struct RenderSystem;
 class SceneWindow : public IEditorWindow {
 
 public:
-    enum Layers : int{
-        LAYER_SCENE,
-        LAYER_PHYSICS,
+    enum SceneLayers : uint32_t {
+        
+        LAYER_UNLIT     = 0x0001,
+        LAYER_WIREFRAME = 0x0002,
+        LAYER_PHYSICS   = 0x0004,
 
-        SIZE,
+        LAYER_COUNT     = 3,
     };
 
 public:
     SceneWindow();
-    ~SceneWindow() = default;
+    ~SceneWindow() override = default;
     
     void setRenderWindow(RenderSystem* renderWindow);
-    void addViewLayer(Layers layer, std::vector<VkImageView> const& image);
+    void addViewLayer(SceneLayers layer, std::vector<VkImageView> const& image);
 
     void create() override;
     void clear() override;
@@ -32,22 +34,26 @@ public:
     void open() override;
     void close() override;
     void draw() override;
-    
 
 private:
     
-    std::map<Layers, std::vector<VkDescriptorSet>> m_renderedImages;
+    std::unordered_map<SceneLayers, std::vector<VkDescriptorSet>> m_renderedImages;
 
-    RenderTarget* m_sceneOutputTexture;
+    RenderTarget* m_sceneUnlitTexture;
+    RenderTarget* m_sceneWireframeTexture;
+    RenderTarget* m_physicsTexture;
+    
     RenderSystem* m_renderWindow;
     CameraInformation m_cameraInfo;
     
     Camera* m_camera;
-    float m_speed           = 10.f;
-    float m_sensibility     = 50.f;
+    float   m_speed           = 10.f;
+    float   m_sensibility     = 50.f;
 
-    float m_smoothScroll    = 0.f;
-    float m_smoothDuration  = 0.2f;
+    float   m_smoothScroll    = 0.f;
+    float   m_smoothDuration  = 0.2f;
+
+    SceneLayers  m_displayedLayer  = LAYER_UNLIT;
 };
 
 

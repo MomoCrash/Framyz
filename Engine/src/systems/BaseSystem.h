@@ -4,6 +4,7 @@
 #define SYSTEMBASE_H
 
 #include "../framework.h"
+#include "../interfaces/editor/SceneWindow.h"
 
 class ComponentBase;
 class EntityManager;
@@ -27,7 +28,8 @@ struct BaseSystem {
     virtual void create();
     
     virtual void update()   = 0;
-    virtual void draw();
+    virtual void drawRenderTarget(SceneWindow::SceneLayers layer, RenderTarget* target);
+    virtual void drawWindow();
     virtual void fixedUpdate();
     
     virtual void destroy();
