@@ -111,6 +111,11 @@ void RenderContext::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
     
 }
 
+bool RenderContext::hasStencilComponent(VkFormat format)  {
+    return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+}
+
+
 void RenderContext::setCurrentFrame(uint32_t* frame)
 {
     m_currentFrame = frame;

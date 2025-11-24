@@ -107,8 +107,7 @@ bool RenderSystem::CreateRenderLayer(SceneWindow::SceneLayers layer, ImageLayout
     VkFormat format = RenderDevice::getInstance()->findSupportedFormat( { VK_FORMAT_B8G8R8A8_SRGB  },
 VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT );
     
-    *out = new RenderTarget(format, 1920, 1080, layout);
-    (*out)->setRenderContext(&Window->getRenderContext());
+    *out = new RenderTarget(&Window->getRenderContext(), format, 1920, 1080, layout);
 
     RenderTargets[layer] = *out;
     return true;

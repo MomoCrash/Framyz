@@ -4,8 +4,9 @@
 #include "Mesh.h"
 #include "RenderObject.h"
 #include "RenderWindow.h"
+#include "Texture.h"
 
-RenderTarget::RenderTarget(VkFormat format, int width, int height, ImageLayoutType type)
+RenderTarget::RenderTarget(RenderContext* context, VkFormat format, int width, int height, ImageLayoutType type)
 {
 
     m_globalBuffer.proj = glm::mat4(1.0f);
@@ -20,16 +21,19 @@ RenderTarget::RenderTarget(VkFormat format, int width, int height, ImageLayoutTy
     m_imageType = static_cast<VkImageLayout>(type);
     m_extent = VkExtent2D( width, height );
     m_offset = VkOffset2D( 0, 0 );
-
-    createRenderPass();
-    createImages();
     
+    m_clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    m_clearValues[1].depthStencil = {1.0f, 0};
+    
+    m_renderContext = context;
+    createRenderPass();
+    
+    createImages();
 }
 
 RenderTarget::~RenderTarget()
 {
     VkDevice const & device = RenderDevice::getInstance()->getDevice();
-
     
     for (auto& image : m_images) 
         vkDestroyImage(device, image, nullptr);
@@ -61,8 +65,8 @@ void RenderTarget::beginDraw()
     renderPassInfo.framebuffer = m_framebuffers[getRenderContext().getCurrentFrame()];
     renderPassInfo.renderArea.offset = m_offset;
     renderPassInfo.renderArea.extent = m_extent;
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &m_clearColor;
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(m_clearValues.size());
+    renderPassInfo.pClearValues = m_clearValues.data();
 
     vkCmdBeginRenderPass(buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     
@@ -126,11 +130,6 @@ VkRenderPass& RenderTarget::getRenderPass()
     return m_renderPass;
 }
 
-void RenderTarget::setRenderContext(RenderContext* renderContext)
-{
-    m_renderContext = renderContext;
-}
-
 RenderContext& RenderTarget::getRenderContext()
 {
     return *m_renderContext;
@@ -147,14 +146,14 @@ std::vector<VkImageView> const & RenderTarget::getImages() {
 
 ////////////////////////// CONTEXT CREATION //////////////////////////////////////
 
-VkImageView RenderTarget::createImageView(VkImage image, VkFormat format)
+VkImageView RenderTarget::createImageView(VkImage image, VkFormat format, VkImageAspectFlagBits flags)
 {
     VkImageViewCreateInfo viewInfo{};
     viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     viewInfo.image = image;
     viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
     viewInfo.format = format;
-    viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    viewInfo.subresourceRange.aspectMask = flags;
     viewInfo.subresourceRange.baseMipLevel = 0;
     viewInfo.subresourceRange.levelCount = 1;
     viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -185,17 +184,43 @@ void RenderTarget::createRenderPass()
     colorAttachmentRef.attachment = 0;
     colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
+    VkAttachmentDescription depthAttachment{};
+    depthAttachment.format = RenderDevice::getInstance()->findDepthFormat();
+    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+    depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+    depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+    depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+    VkAttachmentReference depthAttachmentRef{};
+    depthAttachmentRef.attachment = 1;
+    depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
+    subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
+    VkSubpassDependency dependency{};
+    dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    dependency.dstSubpass = 0;
+    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    dependency.srcAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+    
+    std::array attachments = {colorAttachment, depthAttachment};
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    renderPassInfo.attachmentCount = 1;
-    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    renderPassInfo.pAttachments = attachments.data();
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
+    renderPassInfo.dependencyCount = 1;
+    renderPassInfo.pDependencies = &dependency;
 
     if (vkCreateRenderPass(RenderDevice::getInstance()->getDevice(), &renderPassInfo, nullptr, &m_renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
@@ -257,9 +282,9 @@ void RenderTarget::createImageViews()
     m_imageViews.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < m_imageViews.size(); i++) {
 
-        m_imageViews[i] = createImageView(m_images[i], m_format);
+        m_imageViews[i] = createImageView(m_images[i], m_format, VK_IMAGE_ASPECT_COLOR_BIT);
     }
-
+    
     createFramebuffers();
 }
 
@@ -268,15 +293,16 @@ void RenderTarget::createFramebuffers()
     m_framebuffers.resize(RenderWindow::MAX_FRAMES_IN_FLIGHT);
     
     for (size_t i = 0; i < m_framebuffers.size(); i++) {
-        VkImageView attachments[] = {
+
+        std::array attachments = {
             m_imageViews[i],
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = getRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = m_extent.width + m_offset.x;
         framebufferInfo.height = m_extent.height + m_offset.y;
         framebufferInfo.layers = 1;

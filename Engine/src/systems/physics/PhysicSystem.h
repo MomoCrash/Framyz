@@ -210,6 +210,7 @@ public:
 protected:
 
 	static constexpr int m_collisionStep = 1;
+	bool								m_hasUpdate = false;
 
 	//==== Physics Implementation ====//
 	PhysicsSystem						*m_physicsSystem;

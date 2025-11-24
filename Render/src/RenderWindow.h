@@ -38,8 +38,8 @@ public:
 	void createSurface();
 	void createSwapChain();
 	void createImageViews();
-	void createFramebuffers();
 	void createDepthResources();
+	void createFramebuffers();
 	void createSyncObjects();
 	void recreateSwapchain();
 	
@@ -87,6 +87,13 @@ protected:
 	std::vector<VkImage> m_swapChainImages;
 	std::vector<VkImageView> m_swapChainImageViews;
 	std::vector<VkFramebuffer> m_swapChainFramebuffers;
+
+	// Depth buffer
+    VkFormat                    m_depthFormat;
+	
+	VkImage						m_depthImage;
+	VkDeviceMemory				m_depthImageMemory;
+	VkImageView					m_depthImageView;
 	
 	VkFormat m_swapChainImageFormat;
 	VkExtent2D m_swapChainExtent;
@@ -101,7 +108,7 @@ protected:
 	// Constant buffers
 	glm::uint currentObject;
 	
-	VkClearValue m_clearColor = { {{0.0f, 0.2f, 0.0f, 1.0f}} };
+	std::array<VkClearValue, 2> m_clearValues{};
 
 	// Need this because some drivers don't call resize
 	bool framebufferResized = false;

@@ -20,6 +20,8 @@ public:
     
     void setCurrentFrame(uint32_t* frame);
     uint32_t getCurrentFrame();
+    
+    bool hasStencilComponent(VkFormat format);
 
 private:
     

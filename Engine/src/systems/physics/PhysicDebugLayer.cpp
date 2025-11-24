@@ -30,9 +30,13 @@ void PhysicDebugLayer::Update(RenderTarget *target) {
     
     m_debugMesh = new Mesh("temp_debug_mesh", target->getRenderContext(), &m_debugData);
     m_debugRenderer->Object->setMesh(m_debugMesh);
-    target->drawObject(*m_debugPipeline, *m_debugRenderer->Object);
-
     // TODO CLEAR NOT WORKING
+    
+}
+
+void PhysicDebugLayer::Draw(RenderTarget *target) {
+    
+    target->drawObject(*m_debugPipeline, *m_debugRenderer->Object);
     
 }
 

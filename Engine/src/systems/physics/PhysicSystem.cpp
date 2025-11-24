@@ -18,21 +18,30 @@ PhysicSystem::~PhysicSystem() = default;
 
 void PhysicSystem::update() {
 	
+	
 }
 
 void PhysicSystem::drawRenderTarget(SceneWindow::SceneLayers layer, RenderTarget *target) {
 	BaseSystem::drawRenderTarget(layer, target);
 
 	if (layer != SceneWindow::SceneLayers::LAYER_PHYSICS) return;
-	
-	m_debugLayer->Clear();
+
+	if (m_hasUpdate) {
+		vkDeviceWaitIdle(RenderDevice::getInstance()->getDevice());
+		m_debugLayer->Clear();
+	}
 
 	m_physicsSystem->DrawBodies(m_drawSettings,			// const BodyManager::DrawSettings &inSettings
 						   m_debugLayer,				// DebugRenderer* inRenderer
 						   nullptr						// const BodyDrawFilter* inBodyFilter = nullptr
 	);
+
+	if (m_hasUpdate) {
+		m_debugLayer->Update(target);
+		m_hasUpdate = false;
+	}
 	
-	m_debugLayer->Update(target);
+	m_debugLayer->Draw(target);
 	
 }
 
@@ -209,6 +218,7 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 			body->BodyID = collider->BodySettings->GetID();
 			body->IsValid = true;
 		}
+		m_hasUpdate = true;
 	}
 
 	if (component->is(SphereCollider3D::ComponentMask)) {
@@ -236,7 +246,10 @@ void PhysicSystem::onComponentRegister(ComponentBase *component) {
 			body->BodyID = collider->BodySettings->GetID();
 			body->IsValid = true;
 		}
+		m_hasUpdate = true;
 	}
+
+	
 }
 
 void PhysicSystem::onComponentUnregister(ComponentBase *component) {

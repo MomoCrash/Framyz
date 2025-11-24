@@ -15,6 +15,8 @@ public:
     VkImageView& getImageView();
     
     static const inline std::string TEXTURE_FOLDER = "..\\..\\res\\textures\\";
+    static void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    static void transitionImageLayout(RenderContext& renderWindow, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 
 private:
     VkImage m_textureImage;
@@ -22,9 +24,7 @@ private:
     
     VkDeviceMemory m_textureImageMemory;
 
-    void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     void createTextureImageView(RenderTarget& renderWindow);
-    
-    void transitionImageLayout(RenderContext& renderWindow, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
     void copyBufferToImage(RenderContext& renderWindow, VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 };

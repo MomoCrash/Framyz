@@ -33,21 +33,16 @@ public:
 
 		m_debugData.Indices.emplace_back(vert1);
 		m_debugData.Indices.emplace_back(vert2);
-		m_debugData.Indices.emplace_back(vert1);
 
 	}
-
-	virtual void DrawTriangle(JPH::RVec3Arg inV1, JPH::RVec3Arg inV2, JPH::RVec3Arg inV3, JPH::ColorArg inColor, ECastShadow inCastShadow) override
-	{
-		// Implement
-	}
-
+	
 	virtual void DrawText3D(JPH::RVec3Arg inPosition, const std::string_view &inString, JPH::ColorArg inColor, float inHeight) override
 	{
-		// Implement
+
 	}
 
 	void Update(RenderTarget* target);
+	void Draw(RenderTarget *target);
 	void Clear();
 
 	

@@ -56,7 +56,7 @@ class RenderTarget
 {
 public:
     
-    RenderTarget(VkFormat format, int width, int height, ImageLayoutType type = ImageLayoutType::IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    RenderTarget(RenderContext* context, VkFormat format, int width, int height, ImageLayoutType type = ImageLayoutType::IMAGE_LAYOUT_PRESENT_SRC_KHR);
     ~RenderTarget();
 
     void beginDraw();
@@ -64,23 +64,22 @@ public:
     void endDraw();
     
     VkRenderPass& getRenderPass();
-    void setRenderContext(RenderContext* renderContext);
     RenderContext& getRenderContext();
     
     VkImageView& getImage(glm::uint32 frame);
     std::vector<VkImageView> const& getImages();
 
-    VkImageView createImageView(VkImage image, VkFormat format);
+    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlagBits flags);
 
 private:
 
-    VkClearValue m_clearColor = { {{0.1f, 0.1f, 0.1f, 1.0f}} };
+    std::array<VkClearValue, 2> m_clearValues{};
     UniformBufferObject m_globalBuffer;
     UboDataDynamic m_perObjectBuffer;
     int currentObject = 0;
 
-    RenderContext*              m_renderContext;  
-            
+    RenderContext*              m_renderContext;
+    
     VkFormat                    m_format;
     VkImageLayout               m_imageType;
     VkExtent2D                  m_extent{};
@@ -98,5 +97,6 @@ private:
     void createImages();
     void createImageViews();
     void createFramebuffers();
+
 
 };

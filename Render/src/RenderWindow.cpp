@@ -30,6 +30,9 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
         app->framebufferResized = true;
     });
 
+    m_clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    m_clearValues[1].depthStencil = {1.0f, 0};
+
     createSurface();
 
     RenderDevice::getInstance()->setupPhysicalDevice(getSurface());
@@ -40,13 +43,12 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
 
     createSwapChain();
 
-    m_renderTarget = new RenderTarget(m_swapChainImageFormat, 500, 500);
-    m_renderTarget->setRenderContext(m_renderContext);
-
-    createFramebuffers();
+    m_renderTarget = new RenderTarget(m_renderContext, m_swapChainImageFormat, 500, 500);
 
     createDepthResources();
-
+    
+    createFramebuffers();
+    
     createSyncObjects();
     
 }
@@ -58,6 +60,10 @@ RenderWindow::~RenderWindow()
     delete m_renderTarget;
 
     cleanupSwapChain();
+
+    vkDestroyImageView(RenderDevice::getInstance()->getDevice(), m_depthImageView, nullptr);
+    vkDestroyImage(RenderDevice::getInstance()->getDevice(), m_depthImage, nullptr);
+    vkFreeMemory(RenderDevice::getInstance()->getDevice(), m_depthImageMemory, nullptr);
     
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         
@@ -140,8 +146,19 @@ void RenderWindow::createImageViews()
 
     for (size_t i = 0; i < m_swapChainImages.size(); i++) {
 
-        m_swapChainImageViews[i] = getRenderTarget().createImageView(m_swapChainImages[i], m_swapChainImageFormat);
+        m_swapChainImageViews[i] = getRenderTarget().createImageView(m_swapChainImages[i], m_swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
     }
+}
+
+void RenderWindow::createDepthResources() {
+    Texture::createImage(m_swapChainExtent.width, m_swapChainExtent.height,
+            m_depthFormat, VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            m_depthImage, m_depthImageMemory);
+    m_depthImageView = m_renderTarget->createImageView(m_depthImage, m_depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    Texture::transitionImageLayout(getRenderContext(), m_depthImage, m_depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
 void RenderWindow::createFramebuffers()
@@ -149,15 +166,16 @@ void RenderWindow::createFramebuffers()
     m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); i++) {
-        VkImageView attachments[] = {
-            m_swapChainImageViews[i]
+        std::array attachments = {
+            m_swapChainImageViews[i],
+            m_depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = m_renderTarget->getRenderPass();
-        framebufferInfo.attachmentCount = 1;
-        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.attachmentCount = attachments.size();
+        framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = m_swapChainExtent.width;
         framebufferInfo.height = m_swapChainExtent.height;
         framebufferInfo.layers = 1;
@@ -166,15 +184,6 @@ void RenderWindow::createFramebuffers()
             throw std::runtime_error("failed to create framebuffer!");
         }
     }
-}
-
-void RenderWindow::createDepthResources()
-{
-    
-    VkFormat depthFormat = RenderDevice::getInstance()->findDepthFormat();
-
-    // TODO DEPTH BUFFER
-    
 }
 
 void RenderWindow::createSyncObjects()
@@ -371,8 +380,8 @@ void RenderWindow::beginDraw()
     renderPassInfo.framebuffer = m_swapChainFramebuffers[m_imageIndex];
     renderPassInfo.renderArea.offset = {0, 0};
     renderPassInfo.renderArea.extent = m_swapChainExtent;
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &m_clearColor;
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(m_clearValues.size());
+    renderPassInfo.pClearValues = m_clearValues.data();
 
     vkCmdBeginRenderPass(buffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     
