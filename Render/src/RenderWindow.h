@@ -71,19 +71,19 @@ protected:
 	
 	// Use for frame tracking
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
-	glm::uint32 frameCounter;
+	glm::uint32 frameCounter{};
 
 	// Main device element
-	VkSurfaceKHR m_surface;
+	VkSurfaceKHR m_surface{};
 
 	RenderTarget* m_renderTarget;
 	RenderContext* m_renderContext;
 
-	UniformBufferObject m_globalBuffer;
+	UniformBufferObject m_globalBuffer{};
 	UboDataDynamic m_perObjectBuffer;
 	
 	// Swapchain datas
-	VkSwapchainKHR m_swapchain;
+	VkSwapchainKHR m_swapchain{};
 	std::vector<VkImage> m_swapChainImages;
 	std::vector<VkImageView> m_swapChainImageViews;
 	std::vector<VkFramebuffer> m_swapChainFramebuffers;
@@ -91,12 +91,12 @@ protected:
 	// Depth buffer
     VkFormat                    m_depthFormat;
 	
-	VkImage						m_depthImage;
-	VkDeviceMemory				m_depthImageMemory;
-	VkImageView					m_depthImageView;
+	VkImage						m_depthImage{};
+	VkDeviceMemory				m_depthImageMemory{};
+	VkImageView					m_depthImageView{};
 	
 	VkFormat m_swapChainImageFormat;
-	VkExtent2D m_swapChainExtent;
+	VkExtent2D m_swapChainExtent{};
 
 	// Synchronization objects
 	uint32_t currentFrame = 0;
@@ -106,15 +106,15 @@ protected:
 	std::vector<VkFence> m_inFlightFences;
 
 	// Constant buffers
-	glm::uint currentObject;
+	glm::uint currentObject{};
 	
 	std::array<VkClearValue, 2> m_clearValues{};
 
 	// Need this because some drivers don't call resize
 	bool framebufferResized = false;
 	
-	VkViewport m_viewport;
-	VkRect2D m_scissor;
+	VkViewport m_viewport{};
+	VkRect2D m_scissor{};
 	
 	glm::vec3 position = glm::vec3(0.0f, 0.0f, -3.0f);
 	

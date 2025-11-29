@@ -72,7 +72,7 @@ void SceneWindow::draw() {
 
     float deltaTime     = GameManager::GetClock().GetDeltaTime();
     float finalSpeed    = deltaTime * m_speed;
-    m_smoothScroll      += deltaTime;
+    m_smoothScroll      = deltaTime;
     
     if (Input::GetKeyStatus(Input::W)) {
         m_camera->GetOwner()->offsetLocalPosition(-m_camera->Forward * finalSpeed);
@@ -85,6 +85,12 @@ void SceneWindow::draw() {
     }
     if (Input::GetKeyStatus(Input::A)) {
         m_camera->GetOwner()->offsetLocalPosition(-m_camera->Right * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::SPACE)) {
+        m_camera->GetOwner()->offsetLocalPosition(Transform::Up * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::LEFT_SHIFT)) {
+        m_camera->GetOwner()->offsetLocalPosition(-Transform::Up * finalSpeed);
     }
     
     if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetScrollOffsetY() > 0) {
@@ -147,7 +153,7 @@ void SceneWindow::draw() {
         if (!(layerType & m_displayedLayer)) continue;
         for (VkDescriptorSet imGuiDescriptor : m_renderedImages[layerType]) {
             ImGui::Image((ImTextureID)imGuiDescriptor,
-                ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
+            ImGui::GetWindowSize(), ImVec2(0, 0), ImVec2(1, 1));
         }
     }
     ImGui::End();

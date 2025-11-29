@@ -73,6 +73,10 @@ public:
     void        updateRotation();
     void        update();
     void        reset();
+
+    static inline glm::vec3 Right             = glm::vec3( 1.0f, 0.0f, 0.0f );
+    static inline glm::vec3 Up                = glm::vec3( 0.0f, 1.0f, 0.0f );
+    static inline glm::vec3 Forward           = glm::vec3( 0.0f, 0.0f, 1.0f );
     
 };
 

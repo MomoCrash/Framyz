@@ -22,8 +22,10 @@ RenderTarget::RenderTarget(RenderContext* context, VkFormat format, int width, i
     m_extent = VkExtent2D( width, height );
     m_offset = VkOffset2D( 0, 0 );
     
-    m_clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    m_clearValues[0].color = {{0.2f, 0.2f, 0.2f, 1.0f}};
     m_clearValues[1].depthStencil = {1.0f, 0};
+
+    m_depthFormat = RenderDevice::getInstance()->findDepthFormat();
     
     m_renderContext = context;
     createRenderPass();
@@ -284,8 +286,21 @@ void RenderTarget::createImageViews()
 
         m_imageViews[i] = createImageView(m_images[i], m_format, VK_IMAGE_ASPECT_COLOR_BIT);
     }
+
+    createDepthResources();
     
     createFramebuffers();
+}
+
+void RenderTarget::createDepthResources() {
+    Texture::createImage(m_extent.width, m_extent.height,
+            m_depthFormat, VK_IMAGE_TILING_OPTIMAL,
+            VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            m_depthImage, m_depthImageMemory);
+    m_depthImageView = createImageView(m_depthImage, m_depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+    Texture::transitionImageLayout(getRenderContext(), m_depthImage, m_depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 }
 
 void RenderTarget::createFramebuffers()
@@ -296,12 +311,13 @@ void RenderTarget::createFramebuffers()
 
         std::array attachments = {
             m_imageViews[i],
+            m_depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
         framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebufferInfo.renderPass = getRenderPass();
-        framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+        framebufferInfo.attachmentCount = attachments.size();
         framebufferInfo.pAttachments = attachments.data();
         framebufferInfo.width = m_extent.width + m_offset.x;
         framebufferInfo.height = m_extent.height + m_offset.y;

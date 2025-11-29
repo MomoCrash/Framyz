@@ -30,7 +30,7 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
         app->framebufferResized = true;
     });
 
-    m_clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+    m_clearValues[0].color = {{0.2f, 0.2f, 0.2f, 1.0f}};
     m_clearValues[1].depthStencil = {1.0f, 0};
 
     createSurface();
@@ -41,9 +41,11 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
     m_renderContext = new RenderContext(getSurface());
     m_renderContext->setCurrentFrame(&currentFrame);
 
+    m_depthFormat = RenderDevice::getInstance()->findDepthFormat();
+
     createSwapChain();
 
-    m_renderTarget = new RenderTarget(m_renderContext, m_swapChainImageFormat, 500, 500);
+    m_renderTarget = new RenderTarget(m_renderContext, m_swapChainImageFormat, width, height);
 
     createDepthResources();
     
@@ -226,6 +228,7 @@ void RenderWindow::recreateSwapchain()
 
     createSwapChain();
     createImageViews();
+    createDepthResources();
     createFramebuffers();
 }
 

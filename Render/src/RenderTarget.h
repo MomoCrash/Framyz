@@ -92,10 +92,18 @@ private:
     std::vector<VkFramebuffer>  m_framebuffers;
     std::vector<VkDeviceMemory> m_imagesMemory;
 
+    // Depth buffer
+    VkFormat                    m_depthFormat;
+	
+    VkImage						m_depthImage{};
+    VkDeviceMemory				m_depthImageMemory{};
+    VkImageView					m_depthImageView{};
+
     void createRenderPass();
 
     void createImages();
     void createImageViews();
+    void createDepthResources();
     void createFramebuffers();
 
 
