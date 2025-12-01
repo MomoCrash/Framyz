@@ -38,6 +38,7 @@ public:
 	void createSurface();
 	void createSwapChain();
 	void createImageViews();
+	void createColorResources();
 	void createDepthResources();
 	void createFramebuffers();
 	void createSyncObjects();
@@ -67,26 +68,26 @@ public:
 
 protected:
 	// Reference to device
-	VkDevice const* m_device;
+	VkDevice const*				m_device;
 	
 	// Use for frame tracking
 	std::chrono::time_point<std::chrono::high_resolution_clock> lastTime;
-	glm::uint32 frameCounter{};
+	glm::uint32					frameCounter{};
 
 	// Main device element
-	VkSurfaceKHR m_surface{};
+	VkSurfaceKHR				m_surface{};
 
-	RenderTarget* m_renderTarget;
-	RenderContext* m_renderContext;
+	RenderTarget*				m_renderTarget;
+	RenderContext*				m_renderContext;
 
-	UniformBufferObject m_globalBuffer{};
-	UboDataDynamic m_perObjectBuffer;
+	UniformBufferObject			m_globalBuffer{};
+	UboDataDynamic				m_perObjectBuffer;
 	
 	// Swapchain datas
-	VkSwapchainKHR m_swapchain{};
-	std::vector<VkImage> m_swapChainImages;
-	std::vector<VkImageView> m_swapChainImageViews;
-	std::vector<VkFramebuffer> m_swapChainFramebuffers;
+	VkSwapchainKHR				m_swapchain{};
+	std::vector<VkImage>		m_swapChainImages;
+	std::vector<VkImageView>	m_swapChainImageViews;
+	std::vector<VkFramebuffer>	m_swapChainFramebuffers;
 
 	// Depth buffer
     VkFormat                    m_depthFormat;
@@ -95,28 +96,31 @@ protected:
 	VkDeviceMemory				m_depthImageMemory{};
 	VkImageView					m_depthImageView{};
 	
-	VkFormat m_swapChainImageFormat;
-	VkExtent2D m_swapChainExtent{};
+	// MSAA
+	VkImage						m_colorImage;
+	VkDeviceMemory				m_colorImageMemory;
+	VkImageView					m_colorImageView;
+				
+	VkFormat					m_swapChainImageFormat;
+	VkExtent2D					m_swapChainExtent{};
 
 	// Synchronization objects
-	uint32_t currentFrame = 0;
-	uint32_t m_imageIndex = 0;
-	std::vector<VkSemaphore> m_imageAvailableSemaphores;
-	std::vector<VkSemaphore> m_renderFinishedSemaphores;
-	std::vector<VkFence> m_inFlightFences;
+	uint32_t 					currentFrame = 0;
+	uint32_t 					m_imageIndex = 0;
+	std::vector<VkSemaphore> 	m_imageAvailableSemaphores;
+	std::vector<VkSemaphore> 	m_renderFinishedSemaphores;
+	std::vector<VkFence>		m_inFlightFences;
 
 	// Constant buffers
-	glm::uint currentObject{};
+	glm::uint					currentObject{};
 	
 	std::array<VkClearValue, 2> m_clearValues{};
 
 	// Need this because some drivers don't call resize
-	bool framebufferResized = false;
+	bool						framebufferResized = false;
 	
-	VkViewport m_viewport{};
-	VkRect2D m_scissor{};
-	
-	glm::vec3 position = glm::vec3(0.0f, 0.0f, -3.0f);
+	VkViewport					m_viewport{};
+	VkRect2D					m_scissor{};
 	
 	bool hasStencilComponent(VkFormat format);
 	

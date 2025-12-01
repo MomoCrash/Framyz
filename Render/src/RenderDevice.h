@@ -59,7 +59,10 @@ public:
     VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
     VkFormat findDepthFormat();
     static size_t getDynamicAlignment();
+    VkSampleCountFlagBits getMaxUsableSampleCount() ;
     static void* alignedAlloc(size_t size, size_t alignment);
+
+    VkSampleCountFlagBits&  getSampleCount();
 
 private:
     VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
@@ -78,6 +81,8 @@ private:
     VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE; // Graphic Card Used
     VkQueue m_presentQueue = nullptr;
     VkQueue m_graphicsQueue = nullptr;
+    
+    VkSampleCountFlagBits m_msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkPhysicalDeviceProperties m_deviceProperties;
     VkPhysicalDeviceFeatures m_deviceFeatures;

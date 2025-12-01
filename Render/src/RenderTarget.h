@@ -52,11 +52,20 @@ typedef enum ImageLayoutType {
     IMAGE_LAYOUT_MAX_ENUM = 0x7FFFFFFF
 } ImageLayoutType;
 
+struct RenderTargetInformation {
+    int width;
+    int height;
+    VkFormat format;
+    ImageLayoutType type = IMAGE_LAYOUT_PRESENT_SRC_KHR;
+    
+    bool useMSAA = false;
+};
+
 class RenderTarget
 {
 public:
     
-    RenderTarget(RenderContext* context, VkFormat format, int width, int height, ImageLayoutType type = ImageLayoutType::IMAGE_LAYOUT_PRESENT_SRC_KHR);
+    RenderTarget(RenderContext* context, RenderTargetInformation infos);
     ~RenderTarget();
 
     void beginDraw();
@@ -85,6 +94,8 @@ private:
     VkExtent2D                  m_extent{};
     VkOffset2D                  m_offset{};
     
+    RenderTargetInformation     m_informations;
+    
     VkRenderPass                m_renderPass;
     
     std::vector<VkImage>        m_images;
@@ -94,15 +105,21 @@ private:
 
     // Depth buffer
     VkFormat                    m_depthFormat;
-	
     VkImage						m_depthImage{};
     VkDeviceMemory				m_depthImageMemory{};
     VkImageView					m_depthImageView{};
+
+    // MSAA
+    VkSampleCountFlagBits       m_sampleCount;
+    VkImage						m_colorImage;
+    VkDeviceMemory				m_colorImageMemory;
+    VkImageView					m_colorImageView;
 
     void createRenderPass();
 
     void createImages();
     void createImageViews();
+    void createColorResources() ;
     void createDepthResources();
     void createFramebuffers();
 

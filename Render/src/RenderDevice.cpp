@@ -133,6 +133,7 @@ void RenderDevice::setupPhysicalDevice(VkSurfaceKHR& surface)
     // Check if the best candidate is suitable at all
     if (candidates.rbegin()->first > 0) {
         m_physicalDevice = candidates.rbegin()->second;
+        m_msaaSamples = getMaxUsableSampleCount();
     } else {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
@@ -469,6 +470,21 @@ size_t RenderDevice::getDynamicAlignment()
     return m_dynamicBufferAlignment;
 }
 
+VkSampleCountFlagBits RenderDevice::getMaxUsableSampleCount() {
+    VkPhysicalDeviceProperties physicalDeviceProperties;
+    vkGetPhysicalDeviceProperties(m_physicalDevice, &physicalDeviceProperties);
+
+    VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
+    if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+    if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+    if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+    if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+    if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+    if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+
+    return VK_SAMPLE_COUNT_1_BIT;
+}
+
 void* RenderDevice::alignedAlloc(size_t size, size_t alignment)
 {
     void *data = nullptr;
@@ -482,15 +498,19 @@ void* RenderDevice::alignedAlloc(size_t size, size_t alignment)
     return data;
 }
 
+VkSampleCountFlagBits & RenderDevice::getSampleCount() {
+    return m_msaaSamples;
+}
+
 void RenderDevice::createBuffer(VkBufferUsageFlags usages, VkMemoryPropertyFlags flags,
-                               VkBuffer& buffer, VkDeviceMemory& uploader, uint64_t size)
+                                VkBuffer& buffer, VkDeviceMemory& uploader, uint64_t size)
 {
     
     VkBufferCreateInfo bufferInfo{};
-    bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-    bufferInfo.size = size;
-    bufferInfo.usage = usages;
-    bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    bufferInfo.sType        = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+    bufferInfo.size         = size;
+    bufferInfo.usage        = usages;
+    bufferInfo.sharingMode  = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateBuffer(m_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create vertex buffer!");
@@ -500,9 +520,9 @@ void RenderDevice::createBuffer(VkBufferUsageFlags usages, VkMemoryPropertyFlags
     vkGetBufferMemoryRequirements(m_device, buffer, &memRequirements);
     
     VkMemoryAllocateInfo allocInfo{};
-    allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = findMemoryType(memRequirements.memoryTypeBits, flags);
+    allocInfo.sType             = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+    allocInfo.allocationSize    = memRequirements.size;
+    allocInfo.memoryTypeIndex   = findMemoryType(memRequirements.memoryTypeBits, flags);
 
     if (vkAllocateMemory(m_device, &allocInfo, nullptr, &uploader) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate upload buffer memory!");

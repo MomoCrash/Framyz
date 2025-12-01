@@ -41,7 +41,6 @@ public:
     bool m_hasCamera;
     int m_currentDisplay;
 
-
 };
 
 #endif //RENDERSYSTEM_H

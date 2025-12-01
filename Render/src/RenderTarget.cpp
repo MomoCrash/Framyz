@@ -6,8 +6,7 @@
 #include "RenderWindow.h"
 #include "Texture.h"
 
-RenderTarget::RenderTarget(RenderContext* context, VkFormat format, int width, int height, ImageLayoutType type)
-{
+RenderTarget::RenderTarget(RenderContext *context, RenderTargetInformation infos) {
 
     m_globalBuffer.proj = glm::mat4(1.0f);
     m_globalBuffer.view = glm::mat4(1.0f);
@@ -17,20 +16,22 @@ RenderTarget::RenderTarget(RenderContext* context, VkFormat format, int width, i
     m_perObjectBuffer.model = (glm::mat4*)RenderDevice::alignedAlloc(dBufferSize, align);
     assert(m_perObjectBuffer.model);
 
-    m_format = format;
-    m_imageType = static_cast<VkImageLayout>(type);
-    m_extent = VkExtent2D( width, height );
+    m_format = infos.format;
+    m_imageType = static_cast<VkImageLayout>(infos.type);
+    m_extent = VkExtent2D( infos.width, infos.height );
     m_offset = VkOffset2D( 0, 0 );
+    m_informations = infos;
     
     m_clearValues[0].color = {{0.2f, 0.2f, 0.2f, 1.0f}};
     m_clearValues[1].depthStencil = {1.0f, 0};
 
     m_depthFormat = RenderDevice::getInstance()->findDepthFormat();
-    
+    m_sampleCount = RenderDevice::getInstance()->getMaxUsableSampleCount();
     m_renderContext = context;
     createRenderPass();
     
     createImages();
+    
 }
 
 RenderTarget::~RenderTarget()
@@ -173,14 +174,19 @@ void RenderTarget::createRenderPass()
 {
     
     VkAttachmentDescription colorAttachment{};
-    colorAttachment.format = m_format;
-    colorAttachment.samples         = VK_SAMPLE_COUNT_1_BIT;
+    colorAttachment.format              = m_format;
+    if (m_informations.useMSAA)
+        colorAttachment.samples         = m_sampleCount;
+    else
+        colorAttachment.samples         = VK_SAMPLE_COUNT_1_BIT;
     colorAttachment.loadOp          = VK_ATTACHMENT_LOAD_OP_CLEAR;
     colorAttachment.storeOp         = VK_ATTACHMENT_STORE_OP_STORE;
     colorAttachment.stencilLoadOp   = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     colorAttachment.stencilStoreOp  = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     colorAttachment.initialLayout   = VK_IMAGE_LAYOUT_UNDEFINED;
-    colorAttachment.finalLayout     = m_imageType;
+    if (m_informations.useMSAA)
+        colorAttachment.finalLayout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    else colorAttachment.finalLayout= m_imageType;
 
     VkAttachmentReference colorAttachmentRef{};
     colorAttachmentRef.attachment = 0;
@@ -188,7 +194,10 @@ void RenderTarget::createRenderPass()
 
     VkAttachmentDescription depthAttachment{};
     depthAttachment.format = RenderDevice::getInstance()->findDepthFormat();
-    depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+    if (m_informations.useMSAA)
+        depthAttachment.samples = m_sampleCount;
+    else
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -199,10 +208,28 @@ void RenderTarget::createRenderPass()
     VkAttachmentReference depthAttachmentRef{};
     depthAttachmentRef.attachment = 1;
     depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+    
+    VkAttachmentDescription colorAttachmentResolve{};
+    VkAttachmentReference colorAttachmentResolveRef{};
+    if (m_informations.useMSAA) {
+        colorAttachmentResolve.format = m_informations.format;
+        colorAttachmentResolve.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachmentResolve.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachmentResolve.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorAttachmentResolve.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachmentResolve.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachmentResolve.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachmentResolve.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+        colorAttachmentResolveRef.attachment = 2;
+        colorAttachmentResolveRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    }
+    
     VkSubpassDescription subpass{};
     subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
     subpass.colorAttachmentCount = 1;
+    if (m_informations.useMSAA)
+        subpass.pResolveAttachments = &colorAttachmentResolveRef;
     subpass.pColorAttachments = &colorAttachmentRef;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
@@ -214,7 +241,9 @@ void RenderTarget::createRenderPass()
     dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
     
-    std::array attachments = {colorAttachment, depthAttachment};
+    std::vector attachments = {colorAttachment, depthAttachment};
+    if (m_informations.useMSAA)
+        attachments.push_back(colorAttachmentResolve);
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -287,13 +316,25 @@ void RenderTarget::createImageViews()
         m_imageViews[i] = createImageView(m_images[i], m_format, VK_IMAGE_ASPECT_COLOR_BIT);
     }
 
+    createColorResources();
     createDepthResources();
     
     createFramebuffers();
 }
 
-void RenderTarget::createDepthResources() {
+void RenderTarget::createColorResources() {
+    VkFormat colorFormat = m_informations.format;
+
     Texture::createImage(m_extent.width, m_extent.height,
+        RenderDevice::getInstance()->getSampleCount(), colorFormat,
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_colorImage, m_colorImageMemory);
+    m_colorImageView = createImageView(m_colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+}
+
+void RenderTarget::createDepthResources() {
+    Texture::createImage(m_extent.width, m_extent.height, RenderDevice::getInstance()->getSampleCount(),
             m_depthFormat, VK_IMAGE_TILING_OPTIMAL,
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -310,8 +351,9 @@ void RenderTarget::createFramebuffers()
     for (size_t i = 0; i < m_framebuffers.size(); i++) {
 
         std::array attachments = {
+            m_colorImageView,
+            m_depthImageView,
             m_imageViews[i],
-            m_depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};

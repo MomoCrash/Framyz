@@ -34,6 +34,7 @@ Texture::Texture(RenderTarget& context, std::string const& textureFile)
     stbi_image_free(pixels);
 
     createImage(texWidth, texHeight,
+        VK_SAMPLE_COUNT_1_BIT,
         VK_FORMAT_R8G8B8A8_SRGB,
         VK_IMAGE_TILING_OPTIMAL,
         VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
@@ -67,7 +68,7 @@ VkImageView& Texture::getImageView()
     return m_textureImageView;
 }
 
-void Texture::createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
+void Texture::createImage(uint32_t width, uint32_t height, VkSampleCountFlagBits numSample, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage,
                           VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
     
     VkImageCreateInfo imageInfo{};
@@ -82,7 +83,7 @@ void Texture::createImage(uint32_t width, uint32_t height, VkFormat format, VkIm
     imageInfo.tiling = tiling;
     imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     imageInfo.usage = usage;
-    imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+    imageInfo.samples = numSample;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
     if (vkCreateImage(RenderDevice::getInstance()->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS) {

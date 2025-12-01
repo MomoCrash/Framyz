@@ -45,8 +45,15 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
 
     createSwapChain();
 
-    m_renderTarget = new RenderTarget(m_renderContext, m_swapChainImageFormat, width, height);
+    RenderTargetInformation creationInfos{};
+    creationInfos.format = m_swapChainImageFormat;
+    creationInfos.width = width;
+    creationInfos.height = height;
+    creationInfos.useMSAA = true;
+    m_renderTarget = new RenderTarget(m_renderContext, creationInfos);
 
+    createColorResources();
+    
     createDepthResources();
     
     createFramebuffers();
@@ -152,9 +159,21 @@ void RenderWindow::createImageViews()
     }
 }
 
+void RenderWindow::createColorResources() {
+		VkFormat colorFormat = m_swapChainImageFormat;
+
+		Texture::createImage(m_swapChainExtent.width, m_swapChainExtent.height,
+		    RenderDevice::getInstance()->getSampleCount(), colorFormat,
+		    VK_IMAGE_TILING_OPTIMAL,
+		    VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, m_colorImage, m_colorImageMemory);
+		m_colorImageView = m_renderTarget->createImageView(m_colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT);
+	}
+
 void RenderWindow::createDepthResources() {
     Texture::createImage(m_swapChainExtent.width, m_swapChainExtent.height,
-            m_depthFormat, VK_IMAGE_TILING_OPTIMAL,
+        RenderDevice::getInstance()->getSampleCount(), m_depthFormat,
+        VK_IMAGE_TILING_OPTIMAL,
             VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
             VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             m_depthImage, m_depthImageMemory);
@@ -169,8 +188,9 @@ void RenderWindow::createFramebuffers()
 
     for (size_t i = 0; i < m_swapChainImageViews.size(); i++) {
         std::array attachments = {
+            m_colorImageView,
+            m_depthImageView,
             m_swapChainImageViews[i],
-            m_depthImageView
         };
 
         VkFramebufferCreateInfo framebufferInfo{};
@@ -228,6 +248,7 @@ void RenderWindow::recreateSwapchain()
 
     createSwapChain();
     createImageViews();
+    createColorResources();
     createDepthResources();
     createFramebuffers();
 }
@@ -277,6 +298,15 @@ VkExtent2D RenderWindow::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabi
 
 void RenderWindow::cleanupSwapChain()
 {
+
+    vkDestroyImageView(*m_device, m_depthImageView, nullptr);
+    vkDestroyImage(*m_device, m_depthImage, nullptr);
+    vkFreeMemory(*m_device, m_depthImageMemory, nullptr);
+
+    vkDestroyImageView(*m_device, m_colorImageView, nullptr);
+    vkDestroyImage(*m_device, m_colorImage, nullptr);
+    vkFreeMemory(*m_device, m_colorImageMemory, nullptr);
+    
     for (size_t i = 0; i < m_swapChainFramebuffers.size(); i++) {
         vkDestroyFramebuffer(*m_device, m_swapChainFramebuffers[i], nullptr);
     }
