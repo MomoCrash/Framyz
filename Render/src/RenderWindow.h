@@ -91,7 +91,6 @@ protected:
 
 	// Depth buffer
     VkFormat                    m_depthFormat;
-	
 	VkImage						m_depthImage{};
 	VkDeviceMemory				m_depthImageMemory{};
 	VkImageView					m_depthImageView{};

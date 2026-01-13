@@ -108,10 +108,10 @@ bool RenderSystem::CreateRenderLayer(SceneWindow::SceneLayers layer, ImageLayout
 VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_SAMPLED_IMAGE_BIT );
 
     RenderTargetInformation infos{};
-    infos.format = format;
-    infos.width = 1920;
-    infos.height = 1080;
-    infos.type = layout;
+    infos.format    = format;
+    infos.width     = 1920;
+    infos.height    = 1080;
+    infos.type      = layout;
     infos.useMSAA = true;
     *out = new RenderTarget(&Window->getRenderContext(), infos);
 

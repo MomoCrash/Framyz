@@ -30,6 +30,10 @@ GLFWwindow* Window::GetWindow()
     return m_window;
 }
 
+void Window::SetInputMode(InputMode mode, CursorState state) {
+    glfwSetInputMode(m_window, static_cast<int>(mode), static_cast<int>(state));
+}
+
 void Window::SetKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode) {
     if (action == GLFW_REPEAT)
         return;

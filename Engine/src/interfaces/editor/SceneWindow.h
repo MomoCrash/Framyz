@@ -26,7 +26,7 @@ public:
     ~SceneWindow() override = default;
     
     void setRenderWindow(RenderSystem* renderWindow);
-    void addViewLayer(SceneLayers layer, std::vector<VkImageView> const& image);
+    void addViewLayer(SceneLayers layer, const char* name, std::vector<VkImageView> const& image);
 
     void create() override;
     void clear() override;
@@ -35,9 +35,14 @@ public:
     void close() override;
     void draw() override;
 
+    void handleInput();
+    void handleMouse(float deltaTime);
+    void handleKeyboard(float deltaTime);
+
 private:
     
     std::unordered_map<SceneLayers, std::vector<VkDescriptorSet>> m_renderedImages;
+    std::unordered_map<SceneLayers, const char*> m_layersName;
 
     RenderTarget* m_sceneUnlitTexture;
     RenderTarget* m_sceneWireframeTexture;

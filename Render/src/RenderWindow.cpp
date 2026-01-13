@@ -53,7 +53,6 @@ RenderWindow::RenderWindow(const char* name, const int width, const int height)
     m_renderTarget = new RenderTarget(m_renderContext, creationInfos);
 
     createColorResources();
-    
     createDepthResources();
     
     createFramebuffers();
@@ -110,10 +109,10 @@ void RenderWindow::createSwapChain()
     createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     createInfo.surface = m_surface;
 
-    createInfo.minImageCount = imageCount;
-    createInfo.imageFormat = surfaceFormat.format;
-    createInfo.imageColorSpace = surfaceFormat.colorSpace;
-    createInfo.imageExtent = extent;
+    createInfo.minImageCount    = imageCount;
+    createInfo.imageFormat      = surfaceFormat.format;
+    createInfo.imageColorSpace  = surfaceFormat.colorSpace;
+    createInfo.imageExtent      = extent;
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
@@ -406,7 +405,10 @@ void RenderWindow::beginFrame()
 void RenderWindow::beginDraw()
 {
     VkCommandBuffer& buffer = m_renderContext->getCommandBuffer();
+    
     // Starting a render pass
+    /* TODO | CEST VRAIMENT ETRANGE CAR
+     * TODO | NORMALEMENT CA DEVRAIT ETRE LE CALL QUI EST DANS RENDER TARGET */
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = m_renderTarget->getRenderPass();

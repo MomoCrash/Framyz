@@ -23,10 +23,11 @@ void SceneWindow::setRenderWindow(RenderSystem *renderWindow) {
  * @param image image index
  * @param index index in swapchain
  */
-void SceneWindow::addViewLayer(SceneLayers layer, std::vector<VkImageView> const& images) {
+void SceneWindow::addViewLayer(SceneLayers layer, const char* name, std::vector<VkImageView> const& images) {
 
     if (!m_renderedImages.contains(layer)) {
         m_renderedImages.emplace(layer, std::vector<VkDescriptorSet>());
+        m_layersName.emplace(layer, name);
     }
     
     for (VkImageView const& image : images)
@@ -34,14 +35,14 @@ void SceneWindow::addViewLayer(SceneLayers layer, std::vector<VkImageView> const
 }
 
 void SceneWindow::create() {
-    
-    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_UNLIT,     IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneUnlitTexture);
-    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_WIREFRAME, IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneWireframeTexture);
-    GameManager::GetSystem<RenderSystem>()->CreateRenderLayer(SceneWindow::LAYER_PHYSICS,   IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_physicsTexture);
+    RenderSystem* renderSystem = GameManager::GetSystem<RenderSystem>();
+    renderSystem->CreateRenderLayer(SceneWindow::LAYER_UNLIT,     IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneUnlitTexture);
+    renderSystem->CreateRenderLayer(SceneWindow::LAYER_WIREFRAME, IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_sceneWireframeTexture);
+    renderSystem->CreateRenderLayer(SceneWindow::LAYER_PHYSICS,   IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,  &m_physicsTexture);
 
-    addViewLayer(SceneWindow::LAYER_UNLIT,      m_sceneUnlitTexture->getImages());
-    addViewLayer(SceneWindow::LAYER_WIREFRAME,  m_sceneWireframeTexture->getImages());
-    addViewLayer(SceneWindow::LAYER_PHYSICS,    m_physicsTexture->getImages());
+    addViewLayer(LAYER_UNLIT        , "Unlit",      m_sceneUnlitTexture->getImages());
+    addViewLayer(LAYER_WIREFRAME    , "Wireframe",  m_sceneWireframeTexture->getImages());
+    addViewLayer(LAYER_PHYSICS      , "Physics",    m_physicsTexture->getImages());
     
 }
 
@@ -69,51 +70,6 @@ void SceneWindow::close() {
 
 
 void SceneWindow::draw() {
-
-    float deltaTime     = GameManager::GetClock().GetDeltaTime();
-    float finalSpeed    = deltaTime * m_speed;
-    m_smoothScroll      = deltaTime;
-    
-    if (Input::GetKeyStatus(Input::W)) {
-        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Forward * finalSpeed);
-    }
-    if (Input::GetKeyStatus(Input::S)) {
-        m_camera->GetOwner()->offsetLocalPosition(m_camera->Forward * finalSpeed);
-    }
-    if (Input::GetKeyStatus(Input::D)) {
-        m_camera->GetOwner()->offsetLocalPosition(m_camera->Right * finalSpeed);
-    }
-    if (Input::GetKeyStatus(Input::A)) {
-        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Right * finalSpeed);
-    }
-    if (Input::GetKeyStatus(Input::SPACE)) {
-        m_camera->GetOwner()->offsetLocalPosition(Transform::Up * finalSpeed);
-    }
-    if (Input::GetKeyStatus(Input::LEFT_SHIFT)) {
-        m_camera->GetOwner()->offsetLocalPosition(-Transform::Up * finalSpeed);
-    }
-    
-    if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetScrollOffsetY() > 0) {
-        if (m_smoothScroll > m_smoothDuration) {
-            m_speed += 20.f;
-            if (m_speed > 1600.f) m_speed = 1600.f;
-            m_smoothScroll = 0.f;
-        }
-    }
-    if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetScrollOffsetY() < 0) {
-        if (m_smoothScroll > m_smoothDuration) {
-            m_speed -= 20.f;
-            if (m_speed < 1.f) m_speed = 1.f;
-            m_smoothScroll = 0.f;
-        }
-    }
-    if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetDeltaMouseX() != 0) {
-        m_camera->Yaw += Input::GetDeltaMouseX() * deltaTime * m_sensibility;
-    }
-    if (Input::GetMouseButtonStatus(Input::BUTTON_RIGHT) && Input::GetDeltaMouseY() != 0) {
-        m_camera->Pitch += Input::GetDeltaMouseY() * deltaTime * m_sensibility;
-        m_camera->Pitch = glm::clamp(m_camera->Pitch, -89.0f, 89.0f);
-    }
     
     
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
@@ -122,8 +78,8 @@ void SceneWindow::draw() {
     ImGui::PopStyleVar();
 
     static bool hasSelected = false;
-    static const char* current_item = "View 0";
-    static SceneLayers selectedComponent { LAYER_UNLIT };
+    static const char* current_item = m_layersName[LAYER_UNLIT];
+    static SceneLayers selectedComponent = LAYER_UNLIT ;
     
     ImGui::PushItemWidth(100.f);
     if (ImGui::BeginCombo("##view layer", current_item, ImGuiComboFlags_NoArrowButton))
@@ -132,8 +88,8 @@ void SceneWindow::draw() {
         for (int i = 0; i < SceneLayers::LAYER_COUNT; i++) {
             SceneLayers layer = static_cast<SceneLayers>(1 << i);
             bool is_selected = (selectedComponent == layer);
-            if (ImGui::Selectable(("View mode " + std::to_string(i)).c_str(), is_selected)) {
-                current_item = "View";
+            if (ImGui::Selectable(m_layersName[layer], is_selected)) {
+                current_item = m_layersName[layer];
                 selectedComponent = layer;
                 m_displayedLayer = layer;
                 m_renderWindow->SetCurrentActiveLayer(layer);
@@ -157,5 +113,77 @@ void SceneWindow::draw() {
         }
     }
     ImGui::End();
+    
+    handleInput();
+    
+}
+
+void SceneWindow::handleInput() {
+
+    // Enter in movement mode
+    if (!Input::GetMouseButtonStatus(Input::BUTTON_RIGHT)) {
+        m_renderWindow->Window->SetInputMode(InputMode::CURSOR, CursorState::NORMAL);
+        return;
+    }
+    
+    m_renderWindow->Window->SetInputMode(InputMode::CURSOR, CursorState::DISABLED);
+
+    // Update keyboard & mouse
+    float deltaTime     = GameManager::GetClock().GetDeltaTime();
+    handleKeyboard(deltaTime);
+    handleMouse(deltaTime);
+    
+}
+
+void SceneWindow::handleMouse(float deltaTime) {
+
+    m_smoothScroll      = deltaTime;
+    
+    if (Input::GetScrollOffsetY() > 0) {
+        if (m_smoothScroll > m_smoothDuration) {
+            m_speed += 20.f;
+            if (m_speed > 1600.f) m_speed = 1600.f;
+            m_smoothScroll = 0.f;
+        }
+    }
+    if (Input::GetScrollOffsetY() < 0) {
+        if (m_smoothScroll > m_smoothDuration) {
+            m_speed -= 20.f;
+            if (m_speed < 1.f) m_speed = 1.f;
+            m_smoothScroll = 0.f;
+        }
+    }
+    if (Input::GetDeltaMouseX() != 0) {
+        m_camera->Yaw += Input::GetDeltaMouseX() * deltaTime * m_sensibility;
+    }
+    if (Input::GetDeltaMouseY() != 0) {
+        m_camera->Pitch += Input::GetDeltaMouseY() * deltaTime * m_sensibility;
+        m_camera->Pitch = glm::clamp(m_camera->Pitch, -89.0f, 89.0f);
+    }
+    
+}
+
+void SceneWindow::handleKeyboard(float deltaTime) {
+
+    float finalSpeed    = deltaTime * m_speed;
+    
+    if (Input::GetKeyStatus(Input::W)) {
+        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Forward * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::S)) {
+        m_camera->GetOwner()->offsetLocalPosition(m_camera->Forward * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::D)) {
+        m_camera->GetOwner()->offsetLocalPosition(m_camera->Right * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::A)) {
+        m_camera->GetOwner()->offsetLocalPosition(-m_camera->Right * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::SPACE)) {
+        m_camera->GetOwner()->offsetLocalPosition(Transform::Up * finalSpeed);
+    }
+    if (Input::GetKeyStatus(Input::LEFT_SHIFT)) {
+        m_camera->GetOwner()->offsetLocalPosition(-Transform::Up * finalSpeed);
+    }
     
 }
